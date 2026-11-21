@@ -1,0 +1,28 @@
+{
+  "name": "@cq-talk/web-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "tags": [
+      "type:e2e",
+      "scope:web"
+    ],
+    "implicitDependencies": [
+      "@cq-talk/web"
+    ],
+    "targets": {
+      "typecheck": {
+        "command": "tsc -p tsconfig.json",
+        "options": {
+          "cwd": "{projectRoot}"
+        },
+        "cache": true,
+        "inputs": [
+          "default",
+          "^production"
+        ]
+      }
+    }
+  }
+}

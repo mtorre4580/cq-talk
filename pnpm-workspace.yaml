@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'libs/*'
+  - 'libs/features/*'
+
+allowBuilds:
+  esbuild: true
+  nx: true

@@ -1,0 +1,9 @@
+dist
+coverage
+test-output
+out-tsc
+.nx
+pnpm-lock.yaml
+*.md
+# Reference copy of the design prototype: keep it byte-for-byte as exported
+docs/prototype
