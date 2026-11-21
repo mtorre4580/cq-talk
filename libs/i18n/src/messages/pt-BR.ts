@@ -24,6 +24,33 @@ export const ptBR: Messages = {
     labelOn: 'Desligar o microfone e encerrar a conversa',
     labelOff: 'Microfone desligado',
   },
+  tuner: {
+    prompt: 'Sobre o que você quer falar?',
+    call: 'CHAMAR · CQ',
+    weekly: 'FREQUÊNCIAS DA SEMANA',
+    mhz: '{freq} MHz',
+  },
+  presets: {
+    health: 'Saúde e ciência',
+    worldCup: 'Copa do Mundo 2026',
+    ai: 'Inteligência artificial',
+    climate: 'Mudanças climáticas',
+    space: 'Exploração espacial',
+    economy: 'Economia global',
+    elections: 'Eleições',
+    movies: 'Cinema e séries',
+  },
+  stations: {
+    tokyo: 'Tóquio, Japão',
+    london: 'Londres, Reino Unido',
+    sydney: 'Sydney, Austrália',
+    newYork: 'Nova York, EUA',
+    toronto: 'Toronto, Canadá',
+    helsinki: 'Helsinque, Finlândia',
+  },
+  report: {
+    newQso: 'NOVO QSO',
+  },
   footer: {
     free: 'Grátis · sua API key fica só neste navegador',
     settings: 'Configurar key',
