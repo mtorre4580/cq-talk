@@ -107,6 +107,8 @@ export const ptBR: Messages = {
     vocabulary: 'VOCABULÁRIO PARA ACRESCENTAR',
     practice: 'PARA PRATICAR AMANHÃ',
     download: 'BAIXAR QSL (PDF)',
+    share: 'COMPARTILHAR',
+    preparing: 'Preparando o PDF…',
     newQso: 'NOVO QSO',
   },
   demo: {
@@ -154,6 +156,16 @@ export const ptBR: Messages = {
       removed: 'Key apagada: de volta ao QSO de demonstração.',
       modelSaved: 'Modelo salvo.',
     },
+  },
+  logbook: {
+    title: 'MEUS QSL',
+    empty: 'Ainda não há cartões: faça seu primeiro QSO.',
+    back: 'VOLTAR AO RÁDIO',
+    backToLog: 'VOLTAR AOS MEUS QSL',
+    corrections: '{fixes} de {total} corrigidas',
+    notFound: 'Não encontramos esse cartão.',
+    demo: 'DEMO',
+    loading: 'Procurando seus cartões…',
   },
   footer: {
     free: 'Grátis · sua API key fica só neste navegador',

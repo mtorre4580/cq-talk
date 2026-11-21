@@ -107,6 +107,8 @@ export const en: Messages = {
     vocabulary: 'VOCABULARY TO ADD',
     practice: 'TO PRACTICE TOMORROW',
     download: 'DOWNLOAD QSL (PDF)',
+    share: 'SHARE',
+    preparing: 'Preparing the PDF…',
     newQso: 'NEW QSO',
   },
   demo: {
@@ -154,6 +156,16 @@ export const en: Messages = {
       removed: 'Key removed: back to the demo QSO.',
       modelSaved: 'Model saved.',
     },
+  },
+  logbook: {
+    title: 'MY QSLS',
+    empty: 'No cards yet: make your first QSO.',
+    back: 'BACK TO THE RADIO',
+    backToLog: 'BACK TO MY QSLS',
+    corrections: '{fixes} of {total} corrected',
+    notFound: 'We could not find that card.',
+    demo: 'DEMO',
+    loading: 'Looking for your cards…',
   },
   footer: {
     free: 'Free · your API key stays in this browser',

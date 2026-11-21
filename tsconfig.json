@@ -41,6 +41,9 @@
     },
     {
       "path": "./libs/speech"
+    },
+    {
+      "path": "./libs/features/logbook"
     }
   ]
 }

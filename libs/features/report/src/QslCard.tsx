@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import { useI18n } from '@cq-talk/i18n';
 import type { QslReport } from '@cq-talk/qso';
 
@@ -16,12 +17,14 @@ export interface QslContact {
 export interface QslCardProps {
   contact: QslContact;
   report: QslReport;
+  /** The printed card, for the PDF and image exports */
+  ref?: Ref<HTMLElement>;
 }
 
 const sectionTitle = 'm-0 font-label text-[15px] font-medium tracking-[3px]';
 
 /** The printed QSL card: contact details, mistakes, vocabulary and practice for tomorrow. */
-export const QslCard = ({ contact, report }: QslCardProps) => {
+export const QslCard = ({ contact, report, ref }: QslCardProps) => {
   const { t } = useI18n();
   const fields = [
     { key: t('report.fields.to'), value: t('report.you') },
@@ -37,6 +40,7 @@ export const QslCard = ({ contact, report }: QslCardProps) => {
 
   return (
     <article
+      ref={ref}
       aria-labelledby="qsl-topic"
       className="box-border w-full max-w-[760px] animate-fadein rounded bg-qsl p-2.5 text-qsl-ink shadow-[0_24px_60px_rgba(0,0,0,.7),0_0_80px_rgba(70,255,170,.18)]"
     >

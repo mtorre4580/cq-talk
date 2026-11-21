@@ -44,14 +44,18 @@ describe('useDemoReport', () => {
 });
 
 describe('ReportScreen', () => {
-  const Screen = (props: { onDownload?: () => void; onNewQso?: () => void }) => {
+  const Screen = (props: {
+    onDownload?: (card: HTMLElement, topic: string) => Promise<void>;
+    onNewQso?: () => void;
+  }) => {
     const report = useDemoReport(contact.fixes);
     return (
       <ReportScreen
         contact={contact}
         report={report}
-        onDownload={props.onDownload ?? (() => {})}
-        onNewQso={props.onNewQso ?? (() => {})}
+        download={props.onDownload ?? (async () => {})}
+        secondaryLabel="NUEVO QSO"
+        onSecondary={props.onNewQso ?? (() => {})}
       />
     );
   };
@@ -79,12 +83,12 @@ describe('ReportScreen', () => {
 
   it('offers the PDF and a new QSO', async () => {
     const user = userEvent.setup();
-    const onDownload = vi.fn();
+    const onDownload = vi.fn(async () => {});
     const onNewQso = vi.fn();
     render(<Screen onDownload={onDownload} onNewQso={onNewQso} />, { wrapper: wrapper('es') });
     await user.click(screen.getByRole('button', { name: 'DESCARGAR QSL (PDF)' }));
     await user.click(screen.getByRole('button', { name: 'NUEVO QSO' }));
-    expect(onDownload).toHaveBeenCalledOnce();
+    expect(onDownload).toHaveBeenCalledWith(screen.getByRole('article'), 'Mundial 2026');
     expect(onNewQso).toHaveBeenCalledOnce();
   });
 });
