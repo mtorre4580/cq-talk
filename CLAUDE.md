@@ -88,7 +88,8 @@ libs/                    # added PR by PR; see docs/PLAN.md
   speech/                # type:util        · SpeechInput / SpeechOutput, capability detection
   qso/                   # type:domain      · state machine, stations, presets, frequency hash,
                          #                    ConversationEngine, DemoEngine, types
-  claude/                # type:data-access · ClaudeEngine, prompts, zod schemas
+  claude/                # type:data-access · `.`: models and types only; `./client`: the SDK
+                         #                    (createClient, checkApiKey, ClaudeEngine) loaded with import()
   storage/               # type:data-access · settings, API key, QSL logbook
   features/
     tuner/ call/ report/ settings/ logbook/   # type:feature · screens
@@ -229,8 +230,14 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 
 - The API key lives in `localStorage` under `cq-talk:api-key`, is never logged, never put in a
   URL and only sent to `api.anthropic.com`.
-- `index.html` ships a strict Content Security Policy (`connect-src 'self' https://api.anthropic.com`,
-  no third-party scripts) because a stored key makes XSS costly.
+- The production build ships a strict Content Security Policy (`CONTENT_SECURITY_POLICY` in
+  `apps/web/vite.config.mts`, injected as a `<meta>` on build only, since Vite's dev server needs
+  inline styles): `script-src 'self'`, `style-src 'self'`,
+  `connect-src 'self' https://api.anthropic.com`. React's `style` props are allowed (they go
+  through the CSSOM). `csp.spec.ts` walks every screen with the policy on.
+- The Anthropic SDK stays out of the main bundle: import it only through
+  `await import('@cq-talk/claude/client')`. `checkDynamicDependenciesExceptions` in
+  `eslint.config.mjs` allows the static import of the lightweight `@cq-talk/claude` entry.
 - Settings say plainly that browser speech recognition may send audio to the browser vendor.
 
 ## Conventions
@@ -303,7 +310,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 5 — Radio sound effects
 - [x] 6 — Call screen with demo operator
 - [x] 7 — QSL report card (app matches the prototype)
-- [ ] 8 — API key and model settings
+- [x] 8 — API key and model settings
 - [ ] 9 — Speech input and output
 - [ ] 10 — Live Claude operator
 - [ ] 11 — QSL logbook and PDF export

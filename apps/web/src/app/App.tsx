@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useRadioSfx } from '@cq-talk/audio';
 import { ConversationLog, StationPanel } from '@cq-talk/call';
 import { I18nProvider, useI18n } from '@cq-talk/i18n';
@@ -12,6 +13,7 @@ import {
 } from '@cq-talk/qso';
 import type { QsoState } from '@cq-talk/qso';
 import { ReportScreen, useDemoReport } from '@cq-talk/report';
+import { SettingsDialog } from '@cq-talk/settings';
 import { TunerPanel } from '@cq-talk/tuner';
 import {
   DeskMicrophone,
@@ -53,9 +55,11 @@ const Screen = () => {
   const qso = useQso({ unlock: sound.unlock, tuneIn: sound.tuneIn, off: sound.off });
   const { state } = qso;
   const onAir = isOnAir(state);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <Layout glow={skyGlow(state)}>
+    <Layout glow={skyGlow(state)} onOpenSettings={() => setSettingsOpen(true)}>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       {state.screen !== 'report' && (
         <Rig
           radio={

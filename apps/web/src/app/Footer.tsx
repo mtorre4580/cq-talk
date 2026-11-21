@@ -3,16 +3,20 @@ import { isLocale, locales, useI18n } from '@cq-talk/i18n';
 const linkClass =
   'min-h-6 cursor-pointer border-0 bg-transparent p-0 font-body text-[13px] text-link underline hover:text-link-hover';
 
-export const Footer = () => {
+interface FooterProps {
+  onOpenSettings: () => void;
+}
+
+export const Footer = ({ onOpenSettings }: FooterProps) => {
   const { t, locale, setLocale } = useI18n();
 
   return (
     <footer className="mt-auto flex flex-wrap items-center justify-center gap-5 text-[13px] text-night-muted">
       <span>{t('footer.free')}</span>
-      {/* Wired to the settings dialog in PR 8 and the logbook in PR 11 */}
-      <button type="button" className={linkClass}>
+      <button type="button" onClick={onOpenSettings} className={linkClass}>
         {t('footer.settings')}
       </button>
+      {/* Opens the logbook in PR 11 */}
       <button type="button" className={linkClass}>
         {t('footer.logbook')}
       </button>

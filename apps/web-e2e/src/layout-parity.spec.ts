@@ -44,7 +44,7 @@ test('the app lands on the prototype pixels on every screen', async ({ page }) =
   near('home.plate', await box(page, 'h1 >> xpath=..'), PROTOTYPE.home.plate);
   near('home.meter', await box(page, 'svg[role=img] >> xpath=..'), PROTOTYPE.home.meter);
   near('home.display', await box(page, '#topic >> xpath=..'), PROTOTYPE.home.display);
-  near('home.call', await box(page, 'button[type=submit]'), PROTOTYPE.home.call);
+  near('home.call', await box(page, 'form:has(#topic) button[type=submit]'), PROTOTYPE.home.call);
   near(
     'home.firstKey',
     await box(page, 'ul[aria-labelledby=weekly] button'),
@@ -56,7 +56,11 @@ test('the app lands on the prototype pixels on every screen', async ({ page }) =
   // Separate steps: React registers the call clock only after the preset's timeout renders
   await page.clock.runFor(750);
   await page.clock.runFor(12_000);
-  near('call.station', await box(page, '[role=status] >> xpath=../..'), PROTOTYPE.call.station);
+  near(
+    'call.station',
+    await box(page, '[role=status]:visible >> xpath=../..'),
+    PROTOTYPE.call.station,
+  );
   near('call.log', await box(page, 'section[aria-labelledby=log-title]'), PROTOTYPE.call.log);
   near('call.microphone', await box(page, 'button[aria-label] svg'), PROTOTYPE.call.microphone);
 

@@ -18,6 +18,8 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'retain-on-failure',
+    // Specs inject a style that switches animations off; csp.spec.ts turns the policy back on
+    bypassCSP: true,
   },
   projects: [
     {

@@ -29,6 +29,15 @@
     },
     {
       "path": "./libs/features/report"
+    },
+    {
+      "path": "./libs/features/settings"
+    },
+    {
+      "path": "./libs/storage"
+    },
+    {
+      "path": "./libs/claude"
     }
   ]
 }

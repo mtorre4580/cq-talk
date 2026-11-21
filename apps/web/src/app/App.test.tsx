@@ -33,6 +33,13 @@ describe('App', () => {
     expect(within(footer).getByRole('button', { name: 'Mis QSL' })).toBeInTheDocument();
   });
 
+  it('opens the key settings from the footer', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole('button', { name: 'Configurar key' }));
+    expect(screen.getByRole('dialog', { name: 'CONFIGURAR KEY' })).toBeInTheDocument();
+  });
+
   it('switches the language from the footer and remembers it', async () => {
     const user = userEvent.setup();
     const { unmount } = render(<App />);
