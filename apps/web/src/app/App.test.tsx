@@ -12,6 +12,17 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'CQ talk' })).toBeInTheDocument();
   });
 
+  it('shows the idle rig with the microphone off', () => {
+    render(<App />);
+    expect(screen.getByRole('img', { name: 'Medidor de señal' })).toBeInTheDocument();
+    expect(screen.getByText('BANDA MUNDIAL · 3–30')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Micrófono apagado' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'SONIDO · ON' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
   it('shows the prototype footer in Spanish by default', () => {
     render(<App />);
     const footer = screen.getByRole('contentinfo');

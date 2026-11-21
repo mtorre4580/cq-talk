@@ -9,6 +9,10 @@
     "types": []
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts"],
-  "references": []
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "src/test/**"],
+  "references": [
+    {
+      "path": "../i18n/tsconfig.lib.json"
+    }
+  ]
 }

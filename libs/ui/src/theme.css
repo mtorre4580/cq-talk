@@ -221,6 +221,25 @@
   }
 }
 
+/* S meter needle swing while on air */
+@keyframes cq-vu {
+  0% {
+    transform: rotate(-40deg);
+  }
+  30% {
+    transform: rotate(4deg);
+  }
+  55% {
+    transform: rotate(-16deg);
+  }
+  80% {
+    transform: rotate(18deg);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
+
 /* Decorative motion stops for people who ask the OS for less motion */
 @media (prefers-reduced-motion: reduce) {
   *,
