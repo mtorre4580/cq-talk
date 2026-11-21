@@ -10,6 +10,13 @@ export const axeViolations = async (page: Page): Promise<string[]> => {
 };
 
 /**
+ * Loads every declared font face up front. Screens that appear later (the QSL card) would
+ * otherwise be measured with a fallback font while theirs is still downloading.
+ */
+export const loadAllFonts = (page: Page) =>
+  page.evaluate(() => Promise.all([...document.fonts].map((font) => font.load())).then(() => {}));
+
+/**
  * Opens the app in Spanish (the prototype's language) with sound off, a controllable clock and
  * no decorative motion, so screens can be audited and measured deterministically.
  */
@@ -25,7 +32,7 @@ export const openApp = async (page: Page) => {
   await page.addStyleTag({
     content: '*, *::before, *::after { animation: none !important; transition: none !important; }',
   });
-  await page.evaluate(() => document.fonts.ready);
+  await loadAllFonts(page);
 };
 
 /** Rounded box of the first element matching the locator. */
