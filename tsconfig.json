@@ -5,6 +5,15 @@
   "references": [
     {
       "path": "./apps/web"
+    },
+    {
+      "path": "./libs/platform"
+    },
+    {
+      "path": "./libs/i18n"
+    },
+    {
+      "path": "./libs/ui"
     }
   ]
 }

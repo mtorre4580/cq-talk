@@ -1,13 +1,18 @@
+import { I18nProvider, useI18n } from '@cq-talk/i18n';
+import { Layout } from './Layout';
+
+const Screen = () => {
+  const { t } = useI18n();
+  return (
+    <Layout glow="idle">
+      {/* The rig's brand plate becomes the visible heading in PR 3 */}
+      <h1 className="sr-only">{t('app.name')}</h1>
+    </Layout>
+  );
+};
+
 export const App = () => (
-  <main
-    style={{
-      minHeight: '100vh',
-      display: 'grid',
-      placeItems: 'center',
-      padding: '40px 16px',
-      boxSizing: 'border-box',
-    }}
-  >
-    <h1 style={{ margin: 0, fontSize: 32, fontWeight: 400 }}>CQ talk</h1>
-  </main>
+  <I18nProvider>
+    <Screen />
+  </I18nProvider>
 );

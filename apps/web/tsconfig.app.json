@@ -10,5 +10,15 @@
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/platform/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/i18n/tsconfig.lib.json"
+    }
+  ]
 }

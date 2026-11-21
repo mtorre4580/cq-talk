@@ -1,0 +1,37 @@
+import { isLocale, locales, useI18n } from '@cq-talk/i18n';
+
+const linkClass =
+  'min-h-6 cursor-pointer border-0 bg-transparent p-0 font-body text-[13px] text-link underline hover:text-link-hover';
+
+export const Footer = () => {
+  const { t, locale, setLocale } = useI18n();
+
+  return (
+    <footer className="mt-auto flex flex-wrap items-center justify-center gap-5 text-[13px] text-night-muted">
+      <span>{t('footer.free')}</span>
+      {/* Wired to the settings dialog in PR 8 and the logbook in PR 11 */}
+      <button type="button" className={linkClass}>
+        {t('footer.settings')}
+      </button>
+      <button type="button" className={linkClass}>
+        {t('footer.logbook')}
+      </button>
+      <label className="flex items-center gap-2">
+        <span className="sr-only">{t('footer.language')}</span>
+        <select
+          value={locale}
+          onChange={(event) => {
+            if (isLocale(event.target.value)) setLocale(event.target.value);
+          }}
+          className="min-h-6 cursor-pointer rounded border border-control-border bg-night px-1 font-body text-[13px] text-link hover:text-link-hover"
+        >
+          {locales.map((l) => (
+            <option key={l.id} value={l.id} lang={l.id}>
+              {l.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    </footer>
+  );
+};

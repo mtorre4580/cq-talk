@@ -70,7 +70,10 @@ export default tseslint.config(
         },
       ],
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, allowExportNames: ['useI18n'] },
+      ],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       // Team standard: no new code may use APIs marked `@deprecated` (React, DOM, libs, our own)

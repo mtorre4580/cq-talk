@@ -33,7 +33,7 @@ Claude Code hooks and skills, `CLAUDE.md`, and the prototype copy in `docs/proto
 
 ### 2. Theme and sky
 
-`libs/ui` with `theme.css` (Tailwind v4 `@theme` tokens using the prototype's exact hex values
+`libs/platform` (safe `localStorage`, `usePrefersReducedMotion`) and `libs/ui` with `theme.css` (Tailwind v4 `@theme` tokens using the prototype's exact hex values
 and keyframes), self-hosted fonts, `NightSky` (40 stars + three aurora layers whose opacity
 follows the QSO state), the page layout and footer. `libs/i18n` with typed dictionaries
 (`es` source of truth, `en`, `pt-BR`) and the language switcher in the footer.
