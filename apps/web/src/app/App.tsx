@@ -1,6 +1,7 @@
 import { useRadioSfx } from '@cq-talk/audio';
+import { ConversationLog, StationPanel } from '@cq-talk/call';
 import { I18nProvider, useI18n } from '@cq-talk/i18n';
-import { isOnAir, micState, skyGlow } from '@cq-talk/qso';
+import { callStatus, conversationLog, isOnAir, micState, skyGlow } from '@cq-talk/qso';
 import { TunerPanel } from '@cq-talk/tuner';
 import {
   DeskMicrophone,
@@ -49,11 +50,20 @@ const Screen = () => {
                   onPreset={qso.pickPreset}
                 />
               )}
-              {/* PR 6: station panel and conversation log */}
+              {state.screen === 'call' && (
+                <StationPanel
+                  station={state.station}
+                  elapsed={state.elapsed}
+                  status={callStatus(state)}
+                />
+              )}
             </RigCase>
           }
           microphone={<DeskMicrophone state={micState(state)} onHangUp={qso.hangUp} />}
         />
+      )}
+      {state.screen === 'call' && (
+        <ConversationLog entries={conversationLog(state)} call={state.station.call} />
       )}
       {state.screen === 'report' && (
         // PR 7: the QSL card goes above this button

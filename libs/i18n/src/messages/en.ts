@@ -48,6 +48,23 @@ export const en: Messages = {
     toronto: 'Toronto, Canada',
     helsinki: 'Helsinki, Finland',
   },
+  call: {
+    inContact: 'IN CONTACT WITH',
+    operator: '{place} · AI operator',
+    status: {
+      tuning: 'Tuning…',
+      yourTurn: 'Receiving · your turn',
+      transmitting: 'Transmitting…',
+      closing: '73 · closing…',
+    },
+    clock: 'Duration',
+  },
+  log: {
+    title: 'CONVERSATION LOG',
+    you: 'YOU',
+    better: '✎ Better: {text}',
+    ok: '✓ Copied 5 and 9: well said',
+  },
   report: {
     newQso: 'NEW QSO',
   },

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@cq-talk/audio": "workspace:*",
+    "@cq-talk/call": "workspace:*",
     "@cq-talk/i18n": "workspace:*",
     "@cq-talk/platform": "workspace:*",
     "@cq-talk/qso": "workspace:*",

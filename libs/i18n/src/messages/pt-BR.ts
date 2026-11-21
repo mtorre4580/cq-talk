@@ -48,6 +48,23 @@ export const ptBR: Messages = {
     toronto: 'Toronto, Canadá',
     helsinki: 'Helsinque, Finlândia',
   },
+  call: {
+    inContact: 'EM CONTATO COM',
+    operator: '{place} · operador IA',
+    status: {
+      tuning: 'Sintonizando…',
+      yourTurn: 'Recebendo · sua vez',
+      transmitting: 'Transmitindo…',
+      closing: '73 · encerrando…',
+    },
+    clock: 'Duração',
+  },
+  log: {
+    title: 'LOG DA CONVERSA',
+    you: 'VOCÊ',
+    better: '✎ Melhor: {text}',
+    ok: '✓ Copiado 5 e 9: bem dito',
+  },
   report: {
     newQso: 'NOVO QSO',
   },
