@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRadioSfx } from '@cq-talk/audio';
 import { I18nProvider, useI18n } from '@cq-talk/i18n';
 import { isOnAir, micState, skyGlow } from '@cq-talk/qso';
 import { TunerPanel } from '@cq-talk/tuner';
@@ -16,11 +16,10 @@ import { useQso } from './useQso';
 
 const Screen = () => {
   const { t } = useI18n();
-  const qso = useQso();
+  const sound = useRadioSfx();
+  const qso = useQso({ unlock: sound.unlock, tuneIn: sound.tuneIn, off: sound.off });
   const { state } = qso;
   const onAir = isOnAir(state);
-  // Persisted and wired to the sound effects in PR 5
-  const [soundOn, setSoundOn] = useState(true);
 
   return (
     <Layout glow={skyGlow(state)}>
@@ -28,11 +27,7 @@ const Screen = () => {
         <Rig
           radio={
             <RigCase onAir={onAir}>
-              <TopPlate
-                onAir={onAir}
-                soundOn={soundOn}
-                onToggleSound={() => setSoundOn((on) => !on)}
-              />
+              <TopPlate onAir={onAir} soundOn={sound.soundOn} onToggleSound={sound.toggleSound} />
               <MeterBridge>
                 <SMeter active={onAir} />
                 <TuningDial

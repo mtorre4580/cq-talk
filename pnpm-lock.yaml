@@ -287,6 +287,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@cq-talk/audio':
+        specifier: workspace:*
+        version: link:../../libs/audio
       '@cq-talk/i18n':
         specifier: workspace:*
         version: link:../../libs/i18n
@@ -304,6 +307,15 @@ importers:
         version: link:../../libs/ui
 
   apps/web-e2e: {}
+
+  libs/audio:
+    dependencies:
+      '@cq-talk/platform':
+        specifier: workspace:*
+        version: link:../platform
+      react:
+        specifier: ^19.0.0
+        version: 19.3.1
 
   libs/features/tuner:
     dependencies:

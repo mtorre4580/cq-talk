@@ -1,0 +1,32 @@
+{
+  "name": "@cq-talk/audio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./testing": {
+      "types": "./src/testing.ts",
+      "import": "./src/testing.ts",
+      "default": "./src/testing.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "tags": [
+      "type:util",
+      "scope:shared"
+    ]
+  },
+  "dependencies": {
+    "@cq-talk/platform": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}
