@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // The real policy: the service worker and manifest must load within it
-test.use({ bypassCSP: false });
+test.use({ bypassCSP: false, serviceWorkers: 'allow' });
 
 test('the app is an installable PWA with an offline shell', async ({ page, context }) => {
   await page.goto('./');

@@ -302,10 +302,13 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - The e2e target depends on `@cq-talk/web:build` and Playwright starts `vite preview` itself.
   Nx's inferred preview readiness check never settles with the PWA plugin, so do not point
   `webServer` back at `nx run @cq-talk/web:preview`.
-- **Layout parity** (`layout-parity.spec.ts`): element boxes measured on the rendered prototype
-  at 1280×900; the app must land within ±2 px on every screen. Layout changes that move these
-  boxes on purpose must update the numbers and say why in the PR. Boxes are used instead of
-  image snapshots because font rasterization differs between macOS and the Linux CI.
+- **Layout parity** (`layout-parity.spec.ts`): the test renders the prototype with
+  `renderPrototype()` (`tools/prototype/render.mjs`) using the app's own stylesheet, so both use
+  the same font files, measures its element boxes and the app's in the same run and browser, and
+  requires ±2 px on every screen at 1280×900. Measuring both live is what makes it hold on any
+  platform: fixed numbers measured on macOS failed on the Linux CI, where text rasterizes
+  differently. `loadAllFonts()` loads every font face first, so late screens are never measured
+  with a fallback font.
 - A PR is not merged with failing checks.
 
 ## Git

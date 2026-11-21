@@ -23,6 +23,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
     // Specs inject a style that switches animations off; csp.spec.ts turns the policy back on
     bypassCSP: true,
+    // The PWA's service worker would answer routed test pages with the app shell;
+    // pwa.spec.ts turns it back on
+    serviceWorkers: 'block',
   },
   projects: [
     {

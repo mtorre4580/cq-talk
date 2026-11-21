@@ -6,3 +6,5 @@ packages:
 allowBuilds:
   esbuild: true
   nx: true
+  # jspdf -> core-js: its postinstall only prints a funding message
+  core-js: false

@@ -1,12 +1,22 @@
-/** File name for a card: `cq-talk-qsl-mundial-2026.pdf`. */
+const MAX_SLUG = 40;
+const isSlugChar = (c: string) => (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+
+/**
+ * File name for a card: `cq-talk-qsl-mundial-2026.pdf`. One pass over the topic, no regular
+ * expressions: topics are user input (CodeQL: polynomial regex).
+ */
 export const qslFileName = (topic: string, extension: 'pdf' | 'png'): string => {
-  const slug = topic
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40);
+  // Split accented letters into letter + combining mark (U+0300–U+036F) and drop the marks
+  const plain = topic.normalize('NFD').toLowerCase();
+  let slug = '';
+  for (const c of plain) {
+    if (slug.length >= MAX_SLUG) break;
+    const code = c.charCodeAt(0);
+    if (code >= 0x300 && code <= 0x36f) continue;
+    if (isSlugChar(c)) slug += c;
+    else if (slug && !slug.endsWith('-')) slug += '-';
+  }
+  while (slug.endsWith('-')) slug = slug.slice(0, -1);
   return `cq-talk-qsl-${slug || 'qso'}.${extension}`;
 };
 
