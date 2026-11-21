@@ -38,6 +38,9 @@
     },
     {
       "path": "./libs/claude"
+    },
+    {
+      "path": "./libs/speech"
     }
   ]
 }

@@ -20,6 +20,7 @@ export const createFakeAudioContext = (state: AudioContextState = 'running'): Fa
     exponentialRampToValueAtTime: noop,
   });
   const node = (kind: string, extra: object = {}) => ({
+    loop: false,
     ...extra,
     connect: (target: unknown) => target,
     start: () => {

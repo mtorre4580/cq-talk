@@ -25,6 +25,7 @@ import {
   TuningDial,
 } from '@cq-talk/ui';
 import { Layout } from './Layout';
+import { useOperatorVoice } from './useOperatorVoice';
 import { useQso } from './useQso';
 
 const Report = ({ state, onNewQso }: { state: QsoState; onNewQso: () => void }) => {
@@ -56,6 +57,8 @@ const Screen = () => {
   const { state } = qso;
   const onAir = isOnAir(state);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const log = conversationLog(state);
+  useOperatorVoice(log, { enabled: sound.soundOn && onAir, hiss: sound.hiss });
 
   return (
     <Layout glow={skyGlow(state)} onOpenSettings={() => setSettingsOpen(true)}>
@@ -98,9 +101,7 @@ const Screen = () => {
           microphone={<DeskMicrophone state={micState(state)} onHangUp={qso.hangUp} />}
         />
       )}
-      {state.screen === 'call' && (
-        <ConversationLog entries={conversationLog(state)} call={state.station.call} />
-      )}
+      {state.screen === 'call' && <ConversationLog entries={log} call={state.station.call} />}
       {state.screen === 'report' && <Report state={state} onNewQso={qso.restart} />}
     </Layout>
   );

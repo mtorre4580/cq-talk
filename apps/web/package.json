@@ -19,6 +19,7 @@
     "@cq-talk/qso": "workspace:*",
     "@cq-talk/report": "workspace:*",
     "@cq-talk/settings": "workspace:*",
+    "@cq-talk/speech": "workspace:*",
     "@cq-talk/storage": "workspace:*",
     "@cq-talk/tuner": "workspace:*",
     "@cq-talk/ui": "workspace:*"

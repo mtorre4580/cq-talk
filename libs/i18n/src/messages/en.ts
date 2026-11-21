@@ -59,6 +59,17 @@ export const en: Messages = {
     },
     clock: 'Duration',
   },
+  transmit: {
+    label: 'Your transmission',
+    placeholder: 'Type your answer in English',
+    send: 'TRANSMIT',
+    listening: 'Listening… finish with “over”',
+    waiting: 'Wait: the operator is transmitting',
+    unsupported: 'Your browser cannot recognize speech: type your answer.',
+    notAllowed: 'No microphone permission: type your answer or allow it in the browser.',
+    noMicrophone: 'No microphone found: type your answer.',
+    network: 'Speech recognition is not responding: type your answer.',
+  },
   log: {
     title: 'CONVERSATION LOG',
     you: 'YOU',
