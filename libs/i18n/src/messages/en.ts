@@ -53,6 +53,7 @@ export const en: Messages = {
     operator: '{place} · AI operator',
     status: {
       tuning: 'Tuning…',
+      receiving: 'Receiving…',
       yourTurn: 'Receiving · your turn',
       transmitting: 'Transmitting…',
       closing: '73 · closing…',
@@ -69,6 +70,17 @@ export const en: Messages = {
     notAllowed: 'No microphone permission: type your answer or allow it in the browser.',
     noMicrophone: 'No microphone found: type your answer.',
     network: 'Speech recognition is not responding: type your answer.',
+  },
+  live: {
+    error: {
+      key: 'Anthropic rejected the key: check it in Set up key.',
+      rateLimit: 'Too many API calls: wait a moment and retry.',
+      offline: 'The connection dropped: check your network and retry.',
+      refused: 'The operator cannot continue with this topic: try another QSO.',
+      other: 'Something failed on the call: retry.',
+    },
+    retry: 'RETRY',
+    noLessons: 'We could not write the lessons for this QSO.',
   },
   log: {
     title: 'CONVERSATION LOG',

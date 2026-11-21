@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { checkApiKey } from './client';
+import { checkApiKey } from './anthropic';
 
 const clientThatThrows = (error: unknown) =>
   ({ models: { list: vi.fn().mockRejectedValue(error) } }) as unknown as Pick<Anthropic, 'models'>;

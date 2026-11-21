@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRadioSfx } from '@cq-talk/audio';
-import { ConversationLog, StationPanel } from '@cq-talk/call';
+import { ConversationLog, StationPanel, TransmitPanel } from '@cq-talk/call';
+import { DEFAULT_MODEL } from '@cq-talk/claude';
 import { I18nProvider, useI18n } from '@cq-talk/i18n';
 import {
   callStatus,
@@ -11,9 +12,10 @@ import {
   micState,
   skyGlow,
 } from '@cq-talk/qso';
-import type { QsoState } from '@cq-talk/qso';
+import type { QslReport, QsoState } from '@cq-talk/qso';
 import { ReportScreen, useDemoReport } from '@cq-talk/report';
 import { SettingsDialog } from '@cq-talk/settings';
+import { useSettings } from '@cq-talk/storage';
 import { TunerPanel } from '@cq-talk/tuner';
 import {
   DeskMicrophone,
@@ -25,13 +27,17 @@ import {
   TuningDial,
 } from '@cq-talk/ui';
 import { Layout } from './Layout';
+import { useLiveOperator } from './useLiveOperator';
 import { useOperatorVoice } from './useOperatorVoice';
 import { useQso } from './useQso';
+
+const EMPTY_REPORT: QslReport = { errors: [], vocabulary: [], practice: [] };
 
 const Report = ({ state, onNewQso }: { state: QsoState; onNewQso: () => void }) => {
   const { t } = useI18n();
   const counts = correctionCounts(conversationLog(state));
-  const report = useDemoReport(counts.fixes);
+  const demoReport = useDemoReport(counts.fixes);
+  const report = state.mode === 'live' ? (state.report ?? EMPTY_REPORT) : demoReport;
   return (
     <ReportScreen
       contact={{
@@ -51,14 +57,31 @@ const Report = ({ state, onNewQso }: { state: QsoState; onNewQso: () => void }) 
 };
 
 const Screen = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const settings = useSettings(DEFAULT_MODEL);
   const sound = useRadioSfx();
-  const qso = useQso({ unlock: sound.unlock, tuneIn: sound.tuneIn, off: sound.off });
+  const qso = useQso(
+    { unlock: sound.unlock, tuneIn: sound.tuneIn, off: sound.off },
+    settings.apiKey ? 'live' : 'demo',
+  );
   const { state } = qso;
   const onAir = isOnAir(state);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const log = conversationLog(state);
-  useOperatorVoice(log, { enabled: sound.soundOn && onAir, hiss: sound.hiss });
+  const [speaking, setSpeaking] = useState(false);
+  useOperatorVoice(log, {
+    enabled: sound.soundOn && onAir,
+    hiss: sound.hiss,
+    onSpeaking: setSpeaking,
+  });
+  const live = useLiveOperator({
+    state,
+    dispatch: qso.dispatch,
+    apiKey: settings.apiKey,
+    model: settings.model,
+    locale,
+    speaking,
+  });
 
   return (
     <Layout glow={skyGlow(state)} onOpenSettings={() => setSettingsOpen(true)}>
@@ -96,9 +119,22 @@ const Screen = () => {
                   status={callStatus(state)}
                 />
               )}
+              {state.screen === 'call' && state.mode === 'live' && !state.closing && (
+                <TransmitPanel
+                  yourTurn={live.yourTurn}
+                  listening={live.listening}
+                  interim={live.interim}
+                  notice={live.notice}
+                  error={state.error}
+                  onSend={live.send}
+                  onRetry={live.retry}
+                />
+              )}
             </RigCase>
           }
-          microphone={<DeskMicrophone state={micState(state)} onHangUp={qso.hangUp} />}
+          microphone={
+            <DeskMicrophone state={micState(state)} onHangUp={() => qso.hangUp(live.finish())} />
+          }
         />
       )}
       {state.screen === 'call' && <ConversationLog entries={log} call={state.station.call} />}

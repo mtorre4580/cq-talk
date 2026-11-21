@@ -191,30 +191,40 @@ inputs, keys for options, enamel plate for headings.
 
 ## Conversation engine
 
-`ConversationEngine` (in `libs/qso`) is the only way screens talk to an operator:
+`ConversationEngine` (in `libs/qso`) is the only contract with a live operator. Every method
+takes the whole log so far:
 
 ```ts
 interface ConversationEngine {
-  open(topic: string, station: Station): AsyncIterable<OperatorChunk>; // first transmission
-  send(text: string): {
-    reply: AsyncIterable<OperatorChunk>; // operator's next transmission, streamed
-    assessment: Promise<Assessment>; // { correction: { said, better, why } | null, ok }
-  };
-  close(): Promise<QslReport>; // errors, vocabulary, practice
+  transmit(log, signal?): AsyncIterable<string>; // the operator's next transmission, streamed
+  assess(text, log, signal?): Promise<Assessment>; // fix (better sentence) | ok | none
+  report(log, signal?): Promise<QslReport>; // errors, vocabulary, practice
 }
 ```
 
+- A QSO is `live` when a key is saved (`useQso(effects, mode)`), `demo` otherwise.
 - **Demo mode** replays the prototype's script with its timing (`demoScript` + `demoLinesAt` in
   `libs/qso`; first line at 3 s, then one every 3 s, seven lines). It is pure: in `demo` mode
   `conversationLog(state)` derives the log from the clock, so it needs no engine. It is used
   without a key, in unit and browser tests, and to record media.
-- `ClaudeEngine` (`libs/claude`) uses `@anthropic-ai/sdk` with `dangerouslyAllowBrowser: true`
-  (bring-your-own-key). Model from settings, `claude-opus-5-5` by default. `reply` streams at low
-  effort; `assess` and `close` use structured outputs (`messages.parse` + `zodOutputFormat`).
-  Explanations (`why`, vocabulary definitions, practice) are written in the UI language; the
-  conversation itself is always English. Enable prompt caching on the system prompt, send
-  server-side fallbacks, check `stop_reason` (including `refusal`) before reading content and
-  handle typed SDK errors (401 → check your key, 429 → retry).
+- `createClaudeEngine` (`@cq-talk/claude/client`) runs on the beta Messages endpoint with the
+  model from settings (`claude-opus-5-5` by default). `transmit` streams at `effort: "low"`
+  with automatic prompt caching; `assess` (low) and `report` (medium) use structured outputs
+  (`messages.parse` + `betaZodOutputFormat`). Thinking is never sent: Opus 5.5 cannot disable
+  it, so latency is tuned with `effort`. Server-side fallbacks (`fallbacks: "default"`, beta
+  `server-side-fallback-2026-07-01`) for every model except Haiku 5.5, which has none.
+  `stop_reason: "refusal"` is checked before reading content: a refused transmission says
+  `REFUSAL_LINE` on air, a refused assessment counts as `none`. SDK errors become `LiveError`
+  (`key`, `rate-limit`, `offline`, `refused`, `other`); the transmit panel explains them and
+  offers a retry when one can help. SDK 1.x sends the key as `Authorization: Bearer`.
+- Prompts are pure functions in `libs/claude/src/prompts.ts`: the operator's system prompt
+  (stable per QSO so it caches), the CQ opening cue, the log mapped to alternating turns, the
+  assessor and the report writer. Explanations (`why`, meanings, practice) are written in the UI
+  language; the conversation itself is always English.
+- `useLiveOperator` (`apps/web`) drives a live QSO: loads the SDK when the call starts, streams
+  each transmission into the log, opens the microphone on the user's turn once the operator's
+  voice ends, assesses each line in parallel with the next transmission, and writes the report
+  on hang-up (the QSL card waits for it; no API call if the user never spoke).
 - Turn-taking is half-duplex: while the operator speaks, recognition is paused; the user's turn
   ends when they say "over" or after about 1.5 s of silence (`createSpeechInput` in
   `libs/speech`; `normalizeTransmission` makes every line end in "Over."). Browsers stop
@@ -275,8 +285,9 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   timers where time matters.
 - Audio: never real sound in tests. `@cq-talk/audio/testing` exports a dependency-free fake
   `AudioContext` (`installFakeAudioContext()`) that records which nodes started.
-- Engines: `DemoEngine` is tested directly; `ClaudeEngine` with a mocked SDK client (no network
-  in tests, ever).
+- Engines: the Claude engine is unit-tested with a fake `client.beta.messages`. In the browser,
+  `live.spec.ts` runs a whole live QSO against `fakeAnthropic()` (Playwright routes that answer
+  with real SSE streams and structured JSON) with the CSP on. No network or tokens in tests, ever.
 - Browser tests (`apps/web-e2e`) run in demo mode, at desktop and phone size, with Playwright's
   fake clock (`page.clock`) so the QSO timing is deterministic: axe has no violations on any
   screen, the flow works end to end and the page never scrolls horizontally. `openApp()` in
@@ -318,7 +329,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 7 — QSL report card (app matches the prototype)
 - [x] 8 — API key and model settings
 - [x] 9 — Speech input and output
-- [ ] 10 — Live Claude operator
+- [x] 10 — Live Claude operator
 - [ ] 11 — QSL logbook and PDF export
 - [ ] 12 — Installable PWA
 
