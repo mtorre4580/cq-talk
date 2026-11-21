@@ -1,74 +1,154 @@
 import { expect, test } from '@playwright/test';
-import { box, openApp } from './support';
+import type { Page } from '@playwright/test';
+import { renderPrototype } from '../../../tools/prototype/render.mjs';
+import { loadAllFonts, openApp } from './support';
 
 /**
- * Element boxes measured on the design prototype (docs/prototype, rendered with
- * `pnpm prototype:render`) at 1280×900. The app must land on the same pixels, ±2 px.
+ * The app must land on the prototype's pixels. Both are measured in this run, in this browser,
+ * so font rasterization differences between platforms (macOS vs the Linux CI) cancel out.
+ * The prototype is rendered from docs/prototype with the app's own stylesheet, so both use the
+ * same self-hosted font files.
  */
-const PROTOTYPE = {
+
+type Box = { x: number; y: number; w: number; h: number };
+type Boxes = Record<string, Box>;
+
+/** Elements to compare, found by the prototype's markup and by the app's semantics. */
+const SCREENS = {
   home: {
-    plate: { x: 133, y: 78, w: 292, h: 34 },
-    meter: { x: 133, y: 135, w: 244, h: 134 },
-    display: { x: 211, y: 290, w: 532, h: 58 },
-    call: { x: 757, y: 291, w: 150, h: 56 },
-    firstKey: { x: 133, y: 397, w: 186, h: 66 },
-    microphone: { x: 982, y: 244, w: 180, h: 270 },
+    state: { screen: 'home' },
+    prototype: {
+      plate: `[...document.querySelectorAll('span')].find((s) => s.textContent === 'CQ talk').parentElement`,
+      meter: `document.querySelector('svg[role=img]').parentElement`,
+      display: `document.querySelector('#topic').parentElement`,
+      call: `document.querySelector('button[type=submit]')`,
+      firstKey: `[...document.querySelectorAll('button')].find((b) => b.textContent.includes('Salud'))`,
+      microphone: `document.querySelector('button.mic svg')`,
+    },
+    app: {
+      plate: `document.querySelector('h1').parentElement`,
+      meter: `document.querySelector('svg[role=img]').parentElement`,
+      display: `document.querySelector('#topic').parentElement`,
+      call: `document.querySelector('form:has(#topic) button[type=submit]')`,
+      firstKey: `document.querySelector('ul[aria-labelledby=weekly] button')`,
+      microphone: `document.querySelector('main button[aria-label] svg')`,
+    },
   },
   call: {
-    station: { x: 133, y: 287, w: 774, h: 96 },
-    log: { x: 230, y: 440, w: 820, h: 315 },
-    microphone: { x: 982, y: 74, w: 180, h: 270 },
+    state: {
+      screen: 'call',
+      topic: 'Mundial 2026',
+      freq: '7.074',
+      pos: 17,
+      st: 0,
+      shown: 4,
+      secs: 12,
+    },
+    prototype: {
+      station: `[...document.querySelectorAll('span')].find((s) => s.textContent === 'EN CONTACTO CON').parentElement.parentElement`,
+      log: `[...document.querySelectorAll('span')].find((s) => s.textContent === 'LOG DE LA CONVERSACIÓN').parentElement`,
+      microphone: `document.querySelector('button.mic svg')`,
+    },
+    app: {
+      station: `[...document.querySelectorAll('[role=status]')].find((s) => s.checkVisibility()).parentElement.parentElement`,
+      log: `document.querySelector('section[aria-labelledby=log-title]')`,
+      microphone: `document.querySelector('main button[aria-label] svg')`,
+    },
   },
   report: {
-    card: { x: 260, y: 40, w: 760, h: 845 },
-    download: { x: 448, y: 905, w: 242, h: 48 },
-    newQso: { x: 701, y: 905, w: 131, h: 48 },
+    state: {
+      screen: 'report',
+      topic: 'Mundial 2026',
+      freq: '7.074',
+      pos: 17,
+      st: 0,
+      shown: 4,
+      secs: 12,
+    },
+    prototype: {
+      card: `document.querySelector('div[style*="max-width: 760px"]')`,
+      download: `[...document.querySelectorAll('button')].find((b) => b.textContent.includes('DESCARGAR'))`,
+      newQso: `[...document.querySelectorAll('button')].find((b) => b.textContent.includes('NUEVO'))`,
+    },
+    app: {
+      card: `document.querySelector('article')`,
+      download: `[...document.querySelectorAll('button')].find((b) => b.textContent.includes('DESCARGAR'))`,
+      newQso: `[...document.querySelectorAll('button')].find((b) => b.textContent.includes('NUEVO'))`,
+    },
   },
+} as const;
+
+const measure = (page: Page, selectors: Record<string, string>): Promise<Boxes> =>
+  page.evaluate((entries) => {
+    const result: Record<string, { x: number; y: number; w: number; h: number }> = {};
+    for (const [name, expression] of entries) {
+      const element = new Function(`return ${expression}`)() as Element | null;
+      if (!element) throw new Error(`Not found: ${name}`);
+      const b = element.getBoundingClientRect();
+      result[name] = {
+        x: Math.round(b.x),
+        y: Math.round(b.y),
+        w: Math.round(b.width),
+        h: Math.round(b.height),
+      };
+    }
+    return result;
+  }, Object.entries(selectors));
+
+const NO_MOTION =
+  '*, *::before, *::after { animation: none !important; transition: none !important; }';
+
+/** Opens the prototype in the given state, on the app's origin, with the app's stylesheet. */
+const openPrototype = async (page: Page, state: Record<string, unknown>) => {
+  await page.goto('./');
+  const stylesheet = await page.locator('link[rel=stylesheet]').first().getAttribute('href');
+  const url = new URL(`__prototype/${String(state['screen'])}.html`, page.url()).toString();
+  await page.route(url, (route) =>
+    route.fulfill({
+      contentType: 'text/html',
+      body: renderPrototype(state, { stylesheet: new URL(stylesheet!, page.url()).pathname }),
+    }),
+  );
+  await page.goto(url);
+  await page.addStyleTag({ content: NO_MOTION });
+  await loadAllFonts(page);
 };
 
-const near = (name: string, actual: Record<string, number>, expected: Record<string, number>) => {
-  for (const key of Object.keys(expected)) {
-    expect
-      .soft(
-        Math.abs((actual[key] ?? NaN) - (expected[key] ?? NaN)),
-        `${name}.${key}: got ${JSON.stringify(actual)}, prototype ${JSON.stringify(expected)}`,
-      )
-      .toBeLessThanOrEqual(2);
+const compare = (screen: string, app: Boxes, prototype: Boxes) => {
+  for (const [name, expected] of Object.entries(prototype)) {
+    const actual = app[name]!;
+    for (const key of ['x', 'y', 'w', 'h'] as const) {
+      expect
+        .soft(
+          Math.abs(actual[key] - expected[key]),
+          `${screen}.${name}.${key}: app ${JSON.stringify(actual)}, prototype ${JSON.stringify(expected)}`,
+        )
+        .toBeLessThanOrEqual(2);
+    }
   }
 };
 
 test('the app lands on the prototype pixels on every screen', async ({ page }) => {
   test.skip(test.info().project.name !== 'desktop', 'Measured at the 1280×900 desktop viewport');
-  await openApp(page);
 
-  near('home.plate', await box(page, 'h1 >> xpath=..'), PROTOTYPE.home.plate);
-  near('home.meter', await box(page, 'svg[role=img] >> xpath=..'), PROTOTYPE.home.meter);
-  near('home.display', await box(page, '#topic >> xpath=..'), PROTOTYPE.home.display);
-  near('home.call', await box(page, 'button[type=submit]'), PROTOTYPE.home.call);
-  near(
-    'home.firstKey',
-    await box(page, 'ul[aria-labelledby=weekly] button'),
-    PROTOTYPE.home.firstKey,
-  );
-  near('home.microphone', await box(page, 'button[aria-label] svg'), PROTOTYPE.home.microphone);
+  const prototype: Record<string, Boxes> = {};
+  for (const [name, screen] of Object.entries(SCREENS)) {
+    await openPrototype(page, screen.state);
+    prototype[name] = await measure(page, screen.prototype);
+  }
+
+  await openApp(page);
+  compare('home', await measure(page, SCREENS.home.app), prototype['home']!);
 
   await page.getByRole('button', { name: /Mundial 2026/ }).click();
   // Separate steps: React registers the call clock only after the preset's timeout renders
   await page.clock.runFor(750);
   await page.clock.runFor(12_000);
-  near('call.station', await box(page, '[role=status] >> xpath=../..'), PROTOTYPE.call.station);
-  near('call.log', await box(page, 'section[aria-labelledby=log-title]'), PROTOTYPE.call.log);
-  near('call.microphone', await box(page, 'button[aria-label] svg'), PROTOTYPE.call.microphone);
+  compare('call', await measure(page, SCREENS.call.app), prototype['call']!);
 
   await page
     .getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' })
     .click();
   await page.clock.runFor(1200);
-  near('report.card', await box(page, 'article'), PROTOTYPE.report.card);
-  near(
-    'report.download',
-    await box(page, 'button:has-text("DESCARGAR")'),
-    PROTOTYPE.report.download,
-  );
-  near('report.newQso', await box(page, 'button:has-text("NUEVO")'), PROTOTYPE.report.newQso);
+  compare('report', await measure(page, SCREENS.report.app), prototype['report']!);
 });
