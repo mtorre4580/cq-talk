@@ -311,6 +311,9 @@ importers:
       '@cq-talk/settings':
         specifier: workspace:*
         version: link:../../libs/features/settings
+      '@cq-talk/speech':
+        specifier: workspace:*
+        version: link:../../libs/speech
       '@cq-talk/storage':
         specifier: workspace:*
         version: link:../../libs/storage
@@ -414,6 +417,8 @@ importers:
         version: 19.3.1
 
   libs/qso: {}
+
+  libs/speech: {}
 
   libs/storage:
     dependencies:

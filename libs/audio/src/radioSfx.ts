@@ -111,6 +111,28 @@ const off = (ctx: AudioContext) => {
   click.stop(t + 0.06);
 };
 
+/** Soft band-limited static that loops under the operator's voice; returns a stop function. */
+const hiss = (ctx: AudioContext): (() => void) => {
+  const src = noise(ctx, 2);
+  src.loop = true;
+  const bandpass = ctx.createBiquadFilter();
+  bandpass.type = 'bandpass';
+  bandpass.frequency.value = 1800;
+  bandpass.Q.value = 0.6;
+  const gain = ctx.createGain();
+  const t = ctx.currentTime;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.03, t + 0.2);
+  src.connect(bandpass).connect(gain).connect(ctx.destination);
+  src.start(t);
+  return () => {
+    const end = ctx.currentTime;
+    gain.gain.setValueAtTime(0.03, end);
+    gain.gain.linearRampToValueAtTime(0, end + 0.3);
+    src.stop(end + 0.35);
+  };
+};
+
 export interface RadioSfx {
   /**
    * Creates or resumes the audio context. Call it inside a user gesture (a click), because
@@ -119,6 +141,8 @@ export interface RadioSfx {
   unlock(): void;
   tuneIn(): void;
   off(): void;
+  /** Starts the static bed under a transmission; call the returned function to fade it out */
+  hiss(): () => void;
   dispose(): void;
 }
 
@@ -150,6 +174,15 @@ export const createRadioSfx = (createContext: ContextFactory = defaultContextFac
     unlock: () => void ensure(),
     tuneIn: () => play(tuneIn),
     off: () => play(off),
+    hiss: () => {
+      const c = ensure();
+      if (!c) return () => {};
+      try {
+        return hiss(c);
+      } catch {
+        return () => {};
+      }
+    },
     dispose: () => {
       void ctx?.close().catch(() => {});
       ctx = null;

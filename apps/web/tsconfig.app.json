@@ -21,6 +21,9 @@
       "path": "../../libs/storage/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/speech/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/features/settings/tsconfig.lib.json"
     },
     {

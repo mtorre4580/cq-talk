@@ -14,6 +14,8 @@ export interface RadioSound {
   unlock: () => void;
   tuneIn: () => void;
   off: () => void;
+  /** Static under the operator's voice; returns the function that fades it out */
+  hiss: () => () => void;
 }
 
 /**
@@ -45,5 +47,6 @@ export const useRadioSfx = (sfx?: RadioSfx): RadioSound => {
     off: useCallback(() => {
       if (soundOn) effects.off();
     }, [effects, soundOn]),
+    hiss: useCallback(() => (soundOn ? effects.hiss() : () => {}), [effects, soundOn]),
   };
 };

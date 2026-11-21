@@ -59,6 +59,17 @@ export const ptBR: Messages = {
     },
     clock: 'Duração',
   },
+  transmit: {
+    label: 'Sua transmissão',
+    placeholder: 'Escreva sua resposta em inglês',
+    send: 'TRANSMITIR',
+    listening: 'Ouvindo… termine com “over”',
+    waiting: 'Espere: o operador está transmitindo',
+    unsupported: 'Seu navegador não reconhece voz: escreva sua resposta.',
+    notAllowed: 'Sem permissão para o microfone: escreva sua resposta ou habilite no navegador.',
+    noMicrophone: 'Não encontramos um microfone: escreva sua resposta.',
+    network: 'O reconhecimento de voz não responde: escreva sua resposta.',
+  },
   log: {
     title: 'LOG DA CONVERSA',
     you: 'VOCÊ',

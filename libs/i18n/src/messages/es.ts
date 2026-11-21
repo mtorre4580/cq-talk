@@ -58,6 +58,17 @@ export const es = {
     },
     clock: 'Duración',
   },
+  transmit: {
+    label: 'Tu transmisión',
+    placeholder: 'Escribí tu respuesta en inglés',
+    send: 'TRANSMITIR',
+    listening: 'Escuchando… terminá con “over”',
+    waiting: 'Esperá: el operador está transmitiendo',
+    unsupported: 'Tu navegador no reconoce voz: escribí tu respuesta.',
+    notAllowed: 'Sin permiso para el micrófono: escribí tu respuesta o habilitalo en el navegador.',
+    noMicrophone: 'No encontramos un micrófono: escribí tu respuesta.',
+    network: 'El reconocimiento de voz no responde: escribí tu respuesta.',
+  },
   log: {
     title: 'LOG DE LA CONVERSACIÓN',
     you: 'VOS',

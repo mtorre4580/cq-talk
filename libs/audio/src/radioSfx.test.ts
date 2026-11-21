@@ -25,6 +25,14 @@ describe('createRadioSfx', () => {
     expect(fake.started).toEqual(['noise', 'oscillator']);
   });
 
+  it('loops soft static under a transmission until stopped', () => {
+    const fake = createFakeAudioContext();
+    const stop = createRadioSfx(() => fake.ctx).hiss();
+    expect(fake.started).toEqual(['noise']);
+    expect(() => stop()).not.toThrow();
+    expect(createRadioSfx(() => null).hiss()).toBeTypeOf('function');
+  });
+
   it('is a silent no-op without Web Audio or when it throws', () => {
     expect(() => createRadioSfx(() => null).tuneIn()).not.toThrow();
     expect(() =>

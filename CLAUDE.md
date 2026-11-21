@@ -216,7 +216,13 @@ interface ConversationEngine {
   server-side fallbacks, check `stop_reason` (including `refusal`) before reading content and
   handle typed SDK errors (401 → check your key, 429 → retry).
 - Turn-taking is half-duplex: while the operator speaks, recognition is paused; the user's turn
-  ends when they say "over" or after about 1.5 s of silence.
+  ends when they say "over" or after about 1.5 s of silence (`createSpeechInput` in
+  `libs/speech`; `normalizeTransmission` makes every line end in "Over."). Browsers stop
+  continuous recognition on their own, so it restarts while the turn is open.
+- The operator's lines are read aloud by `useOperatorVoice` (speech synthesis, an English voice)
+  over a soft static bed (`hiss` in `libs/audio`), in demo and live mode, following SONIDO.
+- Typing is always possible (`TransmitPanel`): it is the fallback where recognition is missing
+  (Firefox, some installed iOS apps) or the microphone is blocked.
 
 ## Accessibility (mandatory)
 
@@ -314,7 +320,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 6 — Call screen with demo operator
 - [x] 7 — QSL report card (app matches the prototype)
 - [x] 8 — API key and model settings
-- [ ] 9 — Speech input and output
+- [x] 9 — Speech input and output
 - [ ] 10 — Live Claude operator
 - [ ] 11 — QSL logbook and PDF export
 - [ ] 12 — Installable PWA
