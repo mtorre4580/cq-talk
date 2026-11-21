@@ -28,7 +28,9 @@ describe('SettingsDialog', () => {
 
     expect(check).toHaveBeenCalledWith('sk-ant-api03-secret-a1b2');
     expect(localStorage.getItem('cq-talk:api-key')).toBe('sk-ant-api03-secret-a1b2');
-    expect(screen.getByRole('status')).toHaveTextContent('el próximo QSO es con un operador IA');
+    expect(screen.getAllByRole('status')[0]).toHaveTextContent(
+      'el próximo QSO es con un operador IA',
+    );
     expect(screen.getByText(/Key guardada: sk-ant-…a1b2/)).toBeInTheDocument();
   });
 
@@ -37,7 +39,7 @@ describe('SettingsDialog', () => {
     await user.type(screen.getByLabelText('API KEY DE ANTHROPIC'), 'nope-nope-nope');
     await user.click(screen.getByRole('button', { name: 'GUARDAR' }));
     expect(localStorage.getItem('cq-talk:api-key')).toBeNull();
-    expect(screen.getByRole('status')).toHaveTextContent('Anthropic rechazó la key');
+    expect(screen.getAllByRole('status')[0]).toHaveTextContent('Anthropic rechazó la key');
   });
 
   it('chooses the operator model, Opus 5.5 by default', async () => {
@@ -46,7 +48,7 @@ describe('SettingsDialog', () => {
     await user.click(screen.getByRole('radio', { name: /Haiku 5\.5/ }));
     await user.click(screen.getByRole('button', { name: 'GUARDAR' }));
     expect(localStorage.getItem('cq-talk:model')).toBe('claude-haiku-5-5');
-    expect(screen.getByRole('status')).toHaveTextContent('Modelo guardado.');
+    expect(screen.getAllByRole('status')[0]).toHaveTextContent('Modelo guardado.');
   });
 
   it('removes a saved key', async () => {

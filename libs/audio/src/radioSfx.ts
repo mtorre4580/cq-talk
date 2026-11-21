@@ -133,6 +133,101 @@ const hiss = (ctx: AudioContext): (() => void) => {
   };
 };
 
+/** Soft clipping curve: a little warmth and grit, like an overdriven transmitter. */
+const softClip = (amount = 2.5): Float32Array<ArrayBuffer> => {
+  const samples = 1024;
+  const curve = new Float32Array(samples);
+  for (let i = 0; i < samples; i++) {
+    const x = (i * 2) / samples - 1;
+    curve[i] = Math.tanh(amount * x) / Math.tanh(amount);
+  }
+  return curve;
+};
+
+/** Short high "roger beep" that marks the end of a transmission. */
+const rogerBeep = (ctx: AudioContext) => {
+  const t = ctx.currentTime + 0.05;
+  const beep = ctx.createOscillator();
+  const gain = ctx.createGain();
+  beep.type = 'sine';
+  beep.frequency.value = 1250;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.04, t + 0.01);
+  gain.gain.setValueAtTime(0.04, t + 0.11);
+  gain.gain.linearRampToValueAtTime(0, t + 0.13);
+  beep.connect(gain).connect(ctx.destination);
+  beep.start(t);
+  beep.stop(t + 0.15);
+};
+
+/** A voice playing through the radio; `done` resolves when it ends or is stopped. */
+export interface RadioVoicePlayback {
+  done: Promise<void>;
+  stop(): void;
+}
+
+/**
+ * Plays recorded speech (mp3, wav…) as if it came over the air: telephone band (300–3200 Hz), a
+ * presence lift, soft clipping and compression, then a roger beep.
+ */
+const radioVoice = async (ctx: AudioContext, encoded: ArrayBuffer): Promise<RadioVoicePlayback> => {
+  // decodeAudioData detaches its input: keep the caller's buffer intact
+  const buffer = await ctx.decodeAudioData(encoded.slice(0));
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const highpass = ctx.createBiquadFilter();
+  highpass.type = 'highpass';
+  highpass.frequency.value = 300;
+  const lowpass = ctx.createBiquadFilter();
+  lowpass.type = 'lowpass';
+  lowpass.frequency.value = 3200;
+  const presence = ctx.createBiquadFilter();
+  presence.type = 'peaking';
+  presence.frequency.value = 1800;
+  presence.Q.value = 0.9;
+  presence.gain.value = 4;
+  const drive = ctx.createWaveShaper();
+  drive.curve = softClip();
+  drive.oversample = '2x';
+  const compressor = ctx.createDynamicsCompressor();
+  compressor.threshold.value = -24;
+  compressor.ratio.value = 6;
+  const level = ctx.createGain();
+  level.gain.value = 0.9;
+
+  source
+    .connect(highpass)
+    .connect(lowpass)
+    .connect(presence)
+    .connect(drive)
+    .connect(compressor)
+    .connect(level)
+    .connect(ctx.destination);
+
+  let finish: () => void = () => {};
+  const done = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  source.onended = () => {
+    rogerBeep(ctx);
+    finish();
+  };
+  source.start();
+  return {
+    done,
+    stop: () => {
+      source.onended = null;
+      try {
+        source.stop();
+      } catch {
+        // Already stopped
+      }
+      finish();
+    },
+  };
+};
+
 export interface RadioSfx {
   /**
    * Creates or resumes the audio context. Call it inside a user gesture (a click), because
@@ -143,6 +238,8 @@ export interface RadioSfx {
   off(): void;
   /** Starts the static bed under a transmission; call the returned function to fade it out */
   hiss(): () => void;
+  /** Plays recorded speech through the radio; null without Web Audio or if it cannot decode */
+  voice(encoded: ArrayBuffer): Promise<RadioVoicePlayback | null>;
   dispose(): void;
 }
 
@@ -181,6 +278,15 @@ export const createRadioSfx = (createContext: ContextFactory = defaultContextFac
         return hiss(c);
       } catch {
         return () => {};
+      }
+    },
+    voice: async (encoded) => {
+      const c = ensure();
+      if (!c) return null;
+      try {
+        return await radioVoice(c, encoded);
+      } catch {
+        return null;
       }
     },
     dispose: () => {

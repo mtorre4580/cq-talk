@@ -31,8 +31,8 @@ test('a key Anthropic rejects is never stored', async ({ page }) => {
   await openApp(page);
   await page.getByRole('button', { name: 'Configurar key' }).click();
   await page.getByLabel('API KEY DE ANTHROPIC').fill('sk-ant-api03-not-a-real-key');
-  await page.getByRole('button', { name: 'GUARDAR' }).click();
-  await expect(page.getByRole('dialog').getByRole('status')).toHaveText(
+  await page.getByRole('button', { name: 'GUARDAR', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('status').first()).toHaveText(
     'Anthropic rechazó la key. Revisala y probá de nuevo.',
   );
   expect(await page.evaluate(() => localStorage.getItem('cq-talk:api-key'))).toBeNull();

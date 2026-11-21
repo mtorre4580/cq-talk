@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { storage } from '@cq-talk/platform';
 import { createRadioSfx } from './radioSfx';
-import type { RadioSfx } from './radioSfx';
+import type { RadioSfx, RadioVoicePlayback } from './radioSfx';
 
 export const SOUND_STORAGE_KEY = 'sound';
 
@@ -16,6 +16,8 @@ export interface RadioSound {
   off: () => void;
   /** Static under the operator's voice; returns the function that fades it out */
   hiss: () => () => void;
+  /** Recorded speech through the radio; null when muted or without Web Audio */
+  voice: (encoded: ArrayBuffer) => Promise<RadioVoicePlayback | null>;
 }
 
 /**
@@ -48,5 +50,9 @@ export const useRadioSfx = (sfx?: RadioSfx): RadioSound => {
       if (soundOn) effects.off();
     }, [effects, soundOn]),
     hiss: useCallback(() => (soundOn ? effects.hiss() : () => {}), [effects, soundOn]),
+    voice: useCallback(
+      async (encoded: ArrayBuffer) => (soundOn ? effects.voice(encoded) : null),
+      [effects, soundOn],
+    ),
   };
 };

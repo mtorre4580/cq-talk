@@ -49,4 +49,28 @@ describe('createRadioSfx', () => {
     sfx.dispose();
     expect(fake.calls.close).toBe(1);
   });
+
+  it('plays recorded speech through the radio and beeps when it ends', async () => {
+    const fake = createFakeAudioContext();
+    const playback = await createRadioSfx(() => fake.ctx).voice(new ArrayBuffer(8));
+    expect(playback).not.toBeNull();
+    expect(fake.started).toEqual(['noise']);
+    fake.sources[0]?.onended?.();
+    await playback!.done;
+    expect(fake.started).toEqual(['noise', 'oscillator']);
+  });
+
+  it('can be cut off mid-transmission without a beep', async () => {
+    const fake = createFakeAudioContext();
+    const playback = await createRadioSfx(() => fake.ctx).voice(new ArrayBuffer(8));
+    playback!.stop();
+    await playback!.done;
+    expect(fake.started).toEqual(['noise']);
+  });
+
+  it('gives no playback for audio it cannot decode or without Web Audio', async () => {
+    const fake = createFakeAudioContext();
+    expect(await createRadioSfx(() => fake.ctx).voice(new ArrayBuffer(0))).toBeNull();
+    expect(await createRadioSfx(() => null).voice(new ArrayBuffer(8))).toBeNull();
+  });
 });
