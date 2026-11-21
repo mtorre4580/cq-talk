@@ -22,6 +22,16 @@
           "default",
           "^production"
         ]
+      },
+      "e2e": {
+        "dependsOn": [
+          {
+            "projects": [
+              "@cq-talk/web"
+            ],
+            "target": "build"
+          }
+        ]
       }
     }
   }

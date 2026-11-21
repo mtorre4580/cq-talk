@@ -7,6 +7,16 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom/vitest"]
   },
-  "include": ["vite.config.mts", "src/test-setup.ts", "src/**/*.test.ts", "src/**/*.test.tsx"],
-  "references": [{ "path": "./tsconfig.app.json" }]
+  "include": [
+    "pwa-assets.config.ts",
+    "vite.config.mts",
+    "src/test-setup.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
 }

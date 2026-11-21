@@ -1,0 +1,14 @@
+{
+  "$comment": "Gzip size limits in KB, checked by `pnpm check:bundle` after `pnpm build`. Chunks are matched by name without the content hash. The SDK (`client`) and the PDF export (`jspdf.es.min`, `html2canvas`, `index.es`, `purify.es`) are lazy, so they get their own limits outside the initial load.",
+  "initial": 125,
+  "defaultChunk": 20,
+  "chunks": {
+    "index.js": 110,
+    "client.js": 115,
+    "jspdf.es.min.js": 135,
+    "html2canvas.js": 50,
+    "index.es.js": 52,
+    "purify.es.js": 13,
+    "workbox-window.prod.es5.js": 5
+  }
+}

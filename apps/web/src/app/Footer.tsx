@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { isLocale, locales, useI18n } from '@cq-talk/i18n';
+import { useInstallPrompt } from '@cq-talk/platform';
 
 const linkClass =
   'inline-flex min-h-6 cursor-pointer items-center border-0 bg-transparent p-0 font-body text-[13px] text-link underline hover:text-link-hover';
@@ -10,6 +11,7 @@ interface FooterProps {
 
 export const Footer = ({ onOpenSettings }: FooterProps) => {
   const { t, locale, setLocale } = useI18n();
+  const { canInstall, install } = useInstallPrompt();
 
   return (
     <footer className="mt-auto flex flex-wrap items-center justify-center gap-5 text-[13px] text-night-muted">
@@ -20,6 +22,11 @@ export const Footer = ({ onOpenSettings }: FooterProps) => {
       <Link to="/qsl" className={linkClass}>
         {t('footer.logbook')}
       </Link>
+      {canInstall && (
+        <button type="button" onClick={() => void install()} className={linkClass}>
+          {t('footer.install')}
+        </button>
+      )}
       <label className="flex items-center gap-2">
         <span className="sr-only">{t('footer.language')}</span>
         <select

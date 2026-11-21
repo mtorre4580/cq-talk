@@ -14,6 +14,9 @@ const baseURL = process.env['BASE_URL'] ?? `http://localhost:${PORT}/cq-talk/`;
 export default defineConfig({
   ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src' }),
   forbidOnly: !!process.env['CI'],
+  // Fail loudly instead of hanging (a stale preview server once kept a run waiting)
+  timeout: 30_000,
+  globalTimeout: 10 * 60_000,
   retries: process.env['CI'] ? 1 : 0,
   use: {
     baseURL,
@@ -29,7 +32,9 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: `pnpm nx run @cq-talk/web:preview`,
+    // Plain vite preview: Nx's inferred preview readiness check never settles with the PWA
+    // plugin, so the e2e target depends on the build instead (see package.json)
+    command: `pnpm exec vite preview --config apps/web/vite.config.mts --port ${PORT} --strictPort`,
     url: baseURL,
     reuseExistingServer: !process.env['CI'],
     cwd: workspaceRoot,

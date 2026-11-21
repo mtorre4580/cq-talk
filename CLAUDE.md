@@ -42,12 +42,13 @@ it: colors, sizes, fonts, copy, animations and sounds.
 | Speech | Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Behind interfaces in `libs/speech`, with a typed fallback |
 | Sound effects | Web Audio, synthesized | No audio files. `libs/audio` |
 | Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log, `createLogbook`, database `cq-talk` / store `qsl-log`) | Always through `storage` from `@cq-talk/platform` (never throws); keys prefixed `cq-talk:` |
-| PWA | `vite-plugin-pwa` | From PR 12 |
+| PWA | `vite-plugin-pwa` (Workbox) | Manifest and service worker in `apps/web/vite.config.mts`; `registerSW.js` as a file (an inline script would break the CSP). The app shell is precached (~545 KB); the SDK and PDF chunks are cached on first use. Icons are generated from `apps/web/public/logo.svg` with `pnpm exec pwa-assets-generator --config pwa-assets.config.ts` (run in `apps/web`) |
 | Unit tests | Vitest 5 + React Testing Library + user-event + jsdom | Inferred `test` target per project |
 | Browser tests | Playwright + `@axe-core/playwright` | `apps/web-e2e`, against the production build, desktop (1280×900) and phone (Pixel 7) |
 | Lint/format | ESLint 10 (flat config) + Prettier | `@nx/enforce-module-boundaries`, type-aware `typescript-eslint` |
 | Git hooks | husky + commitlint (`@commitlint/config-conventional`) | `commit-msg` validates the message; `pre-push` runs `nx sync:check` and lint/typecheck/test |
-| CI | GitHub Actions | format, sync check, `nx affected` lint/typecheck/test/build, audit, dependency review, e2e + axe, CodeQL |
+| CI | GitHub Actions | format, sync check, `nx affected` lint/typecheck/test/build, audit, dependency review, e2e + axe, bundle budget + Lighthouse CI, CodeQL |
+| Performance | `bundle-budget.json` (`pnpm check:bundle`, gzip per chunk) + `lighthouserc.json` (`pnpm lhci`) | Initial load ≤ 125 KB gzip; performance ≥ 0.85, accessibility ≥ 0.95, LCP ≤ 2.5 s |
 | Dependencies | Dependabot (weekly, grouped) | `.github/dependabot.yml`; Nx packages move together |
 | Deploy | GitHub Pages | `deploy.yml` runs after CI passes on `main`; `base: '/cq-talk/'`; `404.html` copy for deep links |
 
@@ -65,7 +66,9 @@ pnpm preview             # serve the build at http://localhost:4300/cq-talk/
 pnpm test                # every project's unit tests (nx run-many -t test)
 pnpm lint
 pnpm typecheck           # tsc --build per project
-pnpm e2e                 # Playwright + axe against the production preview
+pnpm e2e                 # Playwright + axe against the production preview (builds first)
+pnpm check:bundle        # gzip budget per chunk (after pnpm build)
+pnpm lhci                # Lighthouse CI on the production build (needs Chrome)
 pnpm check               # what CI runs: sync check, lint, typecheck, test, build
 pnpm format              # Prettier
 pnpm nx graph            # project graph in the browser
@@ -96,6 +99,7 @@ libs/                    # added PR by PR; see docs/PLAN.md
                                               # each other: the app composes them)
 tools/
   prototype/render.mjs   # renders the prototype to static HTML for a given state
+  bundle/                # gzip budget check (pnpm check:bundle)
 docs/
   PLAN.md                # PR roadmap and phase details
   prototype/             # design prototype (visual source of truth)
@@ -295,6 +299,9 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   `src/support.ts` sets Spanish, mutes the sound and switches CSS animations off (the fake clock
   freezes them on their first frame). Advance the clock in separate steps when a timer starts
   another one, so React can register the second.
+- The e2e target depends on `@cq-talk/web:build` and Playwright starts `vite preview` itself.
+  Nx's inferred preview readiness check never settles with the PWA plugin, so do not point
+  `webServer` back at `nx run @cq-talk/web:preview`.
 - **Layout parity** (`layout-parity.spec.ts`): element boxes measured on the rendered prototype
   at 1280×900; the app must land within ±2 px on every screen. Layout changes that move these
   boxes on purpose must update the numbers and say why in the PR. Boxes are used instead of
@@ -332,6 +339,6 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 9 — Speech input and output
 - [x] 10 — Live Claude operator
 - [x] 11 — QSL logbook and PDF export
-- [ ] 12 — Installable PWA
+- [x] 12 — Installable PWA
 
 See `docs/PLAN.md` for the details of each phase.
