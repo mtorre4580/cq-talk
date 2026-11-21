@@ -302,6 +302,9 @@ importers:
       '@cq-talk/qso':
         specifier: workspace:*
         version: link:../../libs/qso
+      '@cq-talk/report':
+        specifier: workspace:*
+        version: link:../../libs/features/report
       '@cq-talk/tuner':
         specifier: workspace:*
         version: link:../../libs/features/tuner
@@ -321,6 +324,18 @@ importers:
         version: 19.3.1
 
   libs/features/call:
+    dependencies:
+      '@cq-talk/i18n':
+        specifier: workspace:*
+        version: link:../../i18n
+      '@cq-talk/qso':
+        specifier: workspace:*
+        version: link:../../qso
+      react:
+        specifier: ^19.0.0
+        version: 19.3.1
+
+  libs/features/report:
     dependencies:
       '@cq-talk/i18n':
         specifier: workspace:*

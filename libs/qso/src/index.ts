@@ -16,3 +16,5 @@ export { STATIONS } from './stations';
 export type { Station, StationId } from './stations';
 export { formatClock, topicSeed, tuneTopic } from './tuning';
 export type { Tuning } from './tuning';
+export { correctionCounts, DEMO_ERRORS, DEMO_PHRASES, demoErrorCount } from './report';
+export type { QslReport, ReportError, ReportPhrase } from './report';

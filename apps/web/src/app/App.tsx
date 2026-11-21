@@ -1,7 +1,17 @@
 import { useRadioSfx } from '@cq-talk/audio';
 import { ConversationLog, StationPanel } from '@cq-talk/call';
 import { I18nProvider, useI18n } from '@cq-talk/i18n';
-import { callStatus, conversationLog, isOnAir, micState, skyGlow } from '@cq-talk/qso';
+import {
+  callStatus,
+  conversationLog,
+  correctionCounts,
+  formatClock,
+  isOnAir,
+  micState,
+  skyGlow,
+} from '@cq-talk/qso';
+import type { QsoState } from '@cq-talk/qso';
+import { ReportScreen, useDemoReport } from '@cq-talk/report';
 import { TunerPanel } from '@cq-talk/tuner';
 import {
   DeskMicrophone,
@@ -14,6 +24,28 @@ import {
 } from '@cq-talk/ui';
 import { Layout } from './Layout';
 import { useQso } from './useQso';
+
+const Report = ({ state, onNewQso }: { state: QsoState; onNewQso: () => void }) => {
+  const { t } = useI18n();
+  const counts = correctionCounts(conversationLog(state));
+  const report = useDemoReport(counts.fixes);
+  return (
+    <ReportScreen
+      contact={{
+        topic: state.topic,
+        call: state.station.call,
+        place: t(`stations.${state.station.id}`),
+        freq: state.freq,
+        duration: formatClock(state.elapsed),
+        ...counts,
+      }}
+      report={report}
+      // The browser's print dialog saves a PDF until the real export lands (PR 11)
+      onDownload={() => window.print()}
+      onNewQso={onNewQso}
+    />
+  );
+};
 
 const Screen = () => {
   const { t } = useI18n();
@@ -65,16 +97,7 @@ const Screen = () => {
       {state.screen === 'call' && (
         <ConversationLog entries={conversationLog(state)} call={state.station.call} />
       )}
-      {state.screen === 'report' && (
-        // PR 7: the QSL card goes above this button
-        <button
-          type="button"
-          onClick={qso.restart}
-          className="min-h-12 cursor-pointer rounded-lg border border-rig-border bg-control px-[22px] font-label text-[15px] font-medium tracking-[2px] text-night-label"
-        >
-          {t('report.newQso')}
-        </button>
-      )}
+      {state.screen === 'report' && <Report state={state} onNewQso={qso.restart} />}
     </Layout>
   );
 };

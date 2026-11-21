@@ -65,7 +65,11 @@ export default tseslint.config(
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
+          // Tooling outside the project graph that tests may use: the prototype renderer
+          allow: [
+            '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
+            '^.*/tools/prototype/render\\.mjs$',
+          ],
           depConstraints,
         },
       ],

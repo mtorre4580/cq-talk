@@ -18,6 +18,9 @@
       "path": "../../libs/features/tuner/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/features/report/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/qso/tsconfig.lib.json"
     },
     {

@@ -78,6 +78,22 @@ describe('QSO flow', () => {
     ).toBeInTheDocument();
   });
 
+  it('prints a QSL card with what the demo QSO logged', async () => {
+    const user = setup();
+    await user.type(screen.getByLabelText('¿De qué querés hablar?'), 'Mundial 2026{Enter}');
+    act(() => vi.advanceTimersByTime(12_000));
+    await user.click(
+      screen.getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' }),
+    );
+    act(() => vi.advanceTimersByTime(CLOSING_DELAY_MS));
+
+    const card = screen.getByRole('article', { name: 'Mundial 2026' });
+    expect(card).toHaveTextContent('00:12');
+    // Four lines on air: two of them yours, both corrected
+    expect(card).toHaveTextContent('CORRECCIONES2 de 2');
+    expect(screen.queryByRole('img', { name: 'Medidor de señal' })).not.toBeInTheDocument();
+  });
+
   it('does not call without a topic', async () => {
     const user = setup();
     await user.click(screen.getByRole('button', { name: 'LLAMAR · CQ' }));
@@ -102,6 +118,7 @@ describe('QSO flow', () => {
     expect(screen.getByText('Imprimiendo tu tarjeta QSL…')).toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(CLOSING_DELAY_MS));
+    expect(screen.getByRole('article', { name: 'space' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'NUEVO QSO' }));
     expect(screen.getByLabelText('¿De qué querés hablar?')).toHaveValue('');
   });

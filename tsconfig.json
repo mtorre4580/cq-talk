@@ -26,6 +26,9 @@
     },
     {
       "path": "./libs/features/call"
+    },
+    {
+      "path": "./libs/features/report"
     }
   ]
 }
