@@ -18,9 +18,14 @@ practice tomorrow.
 
 The UI is in Spanish, English and Brazilian Portuguese; the conversations are always in English.
 
-## Status
+## Use it
 
-Work in progress, delivered as a chain of pull requests. See [docs/PLAN.md](docs/PLAN.md).
+Open **https://mtorre4580.github.io/cq-talk/** on your phone or computer. To install it:
+Android and desktop Chrome/Edge show "Instalar app" in the footer; on iPhone, use Share → Add
+to Home Screen. Then "Configurar key" to talk with a live operator, or press a weekly frequency
+to hear the demo QSO.
+
+The delivery plan and its pull requests are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Development
 
@@ -31,6 +36,7 @@ pnpm install
 pnpm dev      # http://localhost:4200
 pnpm check    # lint, typecheck, unit tests and build
 pnpm e2e      # Playwright + axe against the production build
+pnpm lhci     # Lighthouse CI
 ```
 
 The stack, architecture and conventions are documented in [CLAUDE.md](CLAUDE.md).

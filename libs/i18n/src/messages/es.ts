@@ -171,5 +171,6 @@ export const es = {
     settings: 'Configurar key',
     logbook: 'Mis QSL',
     language: 'Idioma',
+    install: 'Instalar app',
   },
 };

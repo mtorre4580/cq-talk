@@ -26,7 +26,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "prototype:render": "node tools/prototype/render.mjs"
+    "prototype:render": "node tools/prototype/render.mjs",
+    "check:bundle": "tsx tools/bundle/check-bundle.ts",
+    "lhci": "lhci autorun"
   },
   "dependencies": {
     "react": "19.3.1",
@@ -37,6 +39,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
+    "@lhci/cli": "0.16.1",
     "@nx/devkit": "24.0.6",
     "@nx/eslint": "24.0.6",
     "@nx/eslint-plugin": "24.0.6",
@@ -53,6 +56,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vite-pwa/assets-generator": "^2.0.0",
     "@vitejs/plugin-react": "6.3.0",
     "@vitest/coverage-v8": "^5.1.1",
     "eslint": "^10.15.0",
@@ -66,9 +70,13 @@
     "nx": "24.0.6",
     "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.73.0",
     "vite": "8.3.8",
-    "vitest": "^5.1.1"
+    "vite-plugin-pwa": "2.0.0",
+    "vitest": "^5.1.1",
+    "workbox-build": "^7.4.1",
+    "workbox-window": "^7.4.1"
   }
 }

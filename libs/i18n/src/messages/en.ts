@@ -172,5 +172,6 @@ export const en: Messages = {
     settings: 'Set up key',
     logbook: 'My QSLs',
     language: 'Language',
+    install: 'Install app',
   },
 };

@@ -172,5 +172,6 @@ export const ptBR: Messages = {
     settings: 'Configurar key',
     logbook: 'Meus QSL',
     language: 'Idioma',
+    install: 'Instalar app',
   },
 };
