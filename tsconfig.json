@@ -20,6 +20,9 @@
     },
     {
       "path": "./libs/qso"
+    },
+    {
+      "path": "./libs/audio"
     }
   ]
 }

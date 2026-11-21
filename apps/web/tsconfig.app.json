@@ -25,6 +25,9 @@
     },
     {
       "path": "../../libs/i18n/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/audio/tsconfig.lib.json"
     }
   ]
 }

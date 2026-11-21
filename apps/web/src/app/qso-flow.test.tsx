@@ -1,6 +1,8 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { installFakeAudioContext } from '@cq-talk/audio/testing';
 import { App } from './App';
+
 import { CLOSING_DELAY_MS, PRESET_CALL_DELAY_MS } from './useQso';
 
 const setup = () => {
@@ -12,8 +14,38 @@ const setup = () => {
 };
 
 describe('QSO flow', () => {
+  let audio: ReturnType<typeof installFakeAudioContext>;
+  beforeEach(() => {
+    audio = installFakeAudioContext();
+  });
   afterEach(() => {
     vi.useRealTimers();
+    audio.restore();
+  });
+
+  it('plays the tune-in when the call goes out and the click when the mic goes off', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: /Mundial 2026/ }));
+    // The click unlocks audio; the tune-in waits for the needle
+    expect(audio.started).toEqual([]);
+    act(() => vi.advanceTimersByTime(PRESET_CALL_DELAY_MS));
+    expect(audio.started).toEqual(['noise', 'oscillator', 'oscillator', 'oscillator']);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' }),
+    );
+    expect(audio.started.slice(4)).toEqual(['noise', 'oscillator']);
+  });
+
+  it('stays silent with SONIDO · OFF', async () => {
+    const user = setup();
+    await user.click(screen.getByRole('button', { name: 'SONIDO · ON' }));
+    await user.type(screen.getByLabelText('¿De qué querés hablar?'), 'space{Enter}');
+    expect(audio.started).toEqual([]);
+    expect(screen.getByRole('button', { name: 'SONIDO · OFF' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('calls CQ on a typed topic and goes on air', async () => {

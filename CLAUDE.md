@@ -84,7 +84,7 @@ libs/                    # added PR by PR; see docs/PLAN.md
   ui/                    # type:ui          · theme.css, NightSky, rig components, QslCard
   platform/              # type:util        · safe storage, usePrefersReducedMotion, browser helpers
   i18n/                  # type:util        · I18nProvider, useI18n, messages/{es,en,pt-BR}.ts
-  audio/                 # type:util        · radio sound effects, useSound
+  audio/                 # type:util        · radio sound effects, useRadioSfx; `/testing` fake AudioContext
   speech/                # type:util        · SpeechInput / SpeechOutput, capability detection
   qso/                   # type:domain      · state machine, stations, presets, frequency hash,
                          #                    ConversationEngine, DemoEngine, types
@@ -258,6 +258,8 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   `getByLabelText`); no class or test-id selectors unless nothing else works.
 - Pure logic (`libs/qso` reducer, frequency hash, demo timing, schemas): unit tests with fake
   timers where time matters.
+- Audio: never real sound in tests. `@cq-talk/audio/testing` exports a dependency-free fake
+  `AudioContext` (`installFakeAudioContext()`) that records which nodes started.
 - Engines: `DemoEngine` is tested directly; `ClaudeEngine` with a mocked SDK client (no network
   in tests, ever).
 - Browser tests (`apps/web-e2e`) run in demo mode, with `prefers-reduced-motion: reduce` for
@@ -289,7 +291,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 2 — Night sky theme and i18n
 - [x] 3 — Radio rig components
 - [x] 4 — Tuner home screen
-- [ ] 5 — Radio sound effects
+- [x] 5 — Radio sound effects
 - [ ] 6 — Call screen with demo operator
 - [ ] 7 — QSL report card (app matches the prototype)
 - [ ] 8 — API key and model settings
