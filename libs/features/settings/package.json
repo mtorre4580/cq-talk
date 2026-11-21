@@ -1,0 +1,29 @@
+{
+  "name": "@cq-talk/settings",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "tags": [
+      "type:feature",
+      "scope:web"
+    ]
+  },
+  "dependencies": {
+    "@cq-talk/claude": "workspace:*",
+    "@cq-talk/i18n": "workspace:*",
+    "@cq-talk/storage": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

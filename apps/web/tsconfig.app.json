@@ -18,6 +18,12 @@
       "path": "../../libs/features/tuner/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/storage/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/features/settings/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/features/report/tsconfig.lib.json"
     },
     {
@@ -28,6 +34,9 @@
     },
     {
       "path": "../../libs/i18n/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/claude/tsconfig.lib.json"
     },
     {
       "path": "../../libs/features/call/tsconfig.lib.json"

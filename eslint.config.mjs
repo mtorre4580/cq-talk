@@ -65,6 +65,9 @@ export default tseslint.config(
         'error',
         {
           enforceBuildableLibDependency: true,
+          // `@cq-talk/claude` is imported statically for its constants and lazily for
+          // `@cq-talk/claude/client` (the SDK): different entry points, so the split is real
+          checkDynamicDependenciesExceptions: ['@cq-talk/claude'],
           // Tooling outside the project graph that tests may use: the prototype renderer
           allow: [
             '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
