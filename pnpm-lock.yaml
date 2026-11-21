@@ -293,11 +293,32 @@ importers:
       '@cq-talk/platform':
         specifier: workspace:*
         version: link:../../libs/platform
+      '@cq-talk/qso':
+        specifier: workspace:*
+        version: link:../../libs/qso
+      '@cq-talk/tuner':
+        specifier: workspace:*
+        version: link:../../libs/features/tuner
       '@cq-talk/ui':
         specifier: workspace:*
         version: link:../../libs/ui
 
   apps/web-e2e: {}
+
+  libs/features/tuner:
+    dependencies:
+      '@cq-talk/i18n':
+        specifier: workspace:*
+        version: link:../../i18n
+      '@cq-talk/qso':
+        specifier: workspace:*
+        version: link:../../qso
+      '@cq-talk/ui':
+        specifier: workspace:*
+        version: link:../../ui
+      react:
+        specifier: ^19.0.0
+        version: 19.3.1
 
   libs/i18n:
     dependencies:
@@ -313,6 +334,8 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.3.1
+
+  libs/qso: {}
 
   libs/ui:
     dependencies:

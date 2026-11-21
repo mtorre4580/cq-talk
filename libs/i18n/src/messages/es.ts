@@ -23,6 +23,33 @@ export const es = {
     labelOn: 'Apagar el micrófono y terminar la conversación',
     labelOff: 'Micrófono apagado',
   },
+  tuner: {
+    prompt: '¿De qué querés hablar?',
+    call: 'LLAMAR · CQ',
+    weekly: 'FRECUENCIAS DE LA SEMANA',
+    mhz: '{freq} MHz',
+  },
+  presets: {
+    health: 'Salud y ciencia',
+    worldCup: 'Mundial 2026',
+    ai: 'Inteligencia artificial',
+    climate: 'Cambio climático',
+    space: 'Exploración espacial',
+    economy: 'Economía global',
+    elections: 'Elecciones',
+    movies: 'Cine y series',
+  },
+  stations: {
+    tokyo: 'Tokio, Japón',
+    london: 'Londres, Reino Unido',
+    sydney: 'Sídney, Australia',
+    newYork: 'Nueva York, EE.UU.',
+    toronto: 'Toronto, Canadá',
+    helsinki: 'Helsinki, Finlandia',
+  },
+  report: {
+    newQso: 'NUEVO QSO',
+  },
   footer: {
     free: 'Gratis · tu API key queda solo en este navegador',
     settings: 'Configurar key',

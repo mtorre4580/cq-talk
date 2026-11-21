@@ -117,9 +117,13 @@ Every project is a workspace package named `@cq-talk/<name>` with its Nx tags in
 - Import another project only through its package name (`@cq-talk/ui`), never a relative path
   into it or a deep import of its internals. Each library exports its public API from
   `src/index.ts`.
-- `libs/qso` is pure TypeScript: no React, no DOM, no network, no timers it does not receive.
+- `libs/qso` is pure TypeScript: no React, no DOM, no network, no timers it does not receive
+  (its own `eslint.config.mjs` forbids React, `window`, `document`, `localStorage` and `fetch`).
   Everything with side effects (audio, speech, storage, the API) lives in util or data-access
-  libraries and is injected.
+  libraries and is injected. Timers around the QSO (the 750 ms preset delay, the 1 s clock, the
+  1.2 s closing pause) live in `apps/web/src/app/useQso.ts`.
+- Domain data that needs words (preset topics, station cities) keeps only ids in `libs/qso`;
+  the text lives in the dictionaries (`presets.<id>`, `stations.<id>`).
 - A new library: create the folder with `package.json` (name, tags, `exports`), `tsconfig.json`
   (+ `tsconfig.lib.json`, `tsconfig.spec.json`), `vite.config.mts` if it has tests and
   `eslint.config.mjs`; add it as a `workspace:*` dependency of its consumers; run
@@ -284,7 +288,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 1 — Bootstrap (Nx workspace, tooling, CI, Pages)
 - [x] 2 — Night sky theme and i18n
 - [x] 3 — Radio rig components
-- [ ] 4 — Tuner home screen
+- [x] 4 — Tuner home screen
 - [ ] 5 — Radio sound effects
 - [ ] 6 — Call screen with demo operator
 - [ ] 7 — QSL report card (app matches the prototype)
