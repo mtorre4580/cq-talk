@@ -106,6 +106,8 @@ export const es = {
     vocabulary: 'VOCABULARIO PARA SUMAR',
     practice: 'PARA PRACTICAR MAÑANA',
     download: 'DESCARGAR QSL (PDF)',
+    share: 'COMPARTIR',
+    preparing: 'Preparando el PDF…',
     newQso: 'NUEVO QSO',
   },
   demo: {
@@ -153,6 +155,16 @@ export const es = {
       removed: 'Key borrada: volvés al QSO de demostración.',
       modelSaved: 'Modelo guardado.',
     },
+  },
+  logbook: {
+    title: 'MIS QSL',
+    empty: 'Todavía no hay tarjetas: hacé tu primer QSO.',
+    back: 'VOLVER A LA RADIO',
+    backToLog: 'VOLVER A MIS QSL',
+    corrections: '{fixes} de {total} corregidas',
+    notFound: 'No encontramos esa tarjeta.',
+    demo: 'DEMO',
+    loading: 'Buscando tus tarjetas…',
   },
   footer: {
     free: 'Gratis · tu API key queda solo en este navegador',

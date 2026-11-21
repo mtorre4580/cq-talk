@@ -36,6 +36,9 @@
       "path": "../../libs/platform/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/features/logbook/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/i18n/tsconfig.lib.json"
     },
     {

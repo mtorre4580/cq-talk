@@ -30,7 +30,7 @@ describe('App', () => {
       within(footer).getByText('Gratis · tu API key queda solo en este navegador'),
     ).toBeInTheDocument();
     expect(within(footer).getByRole('button', { name: 'Configurar key' })).toBeInTheDocument();
-    expect(within(footer).getByRole('button', { name: 'Mis QSL' })).toBeInTheDocument();
+    expect(within(footer).getByRole('link', { name: 'Mis QSL' })).toBeInTheDocument();
   });
 
   it('opens the key settings from the footer', async () => {
@@ -44,7 +44,7 @@ describe('App', () => {
     const user = userEvent.setup();
     const { unmount } = render(<App />);
     await user.selectOptions(screen.getByRole('combobox', { name: 'Idioma' }), 'en');
-    expect(screen.getByRole('button', { name: 'My QSLs' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'My QSLs' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('en');
 
     unmount();

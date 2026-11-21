@@ -15,6 +15,7 @@
     "@cq-talk/call": "workspace:*",
     "@cq-talk/claude": "workspace:*",
     "@cq-talk/i18n": "workspace:*",
+    "@cq-talk/logbook": "workspace:*",
     "@cq-talk/platform": "workspace:*",
     "@cq-talk/qso": "workspace:*",
     "@cq-talk/report": "workspace:*",
@@ -22,6 +23,7 @@
     "@cq-talk/speech": "workspace:*",
     "@cq-talk/storage": "workspace:*",
     "@cq-talk/tuner": "workspace:*",
-    "@cq-talk/ui": "workspace:*"
+    "@cq-talk/ui": "workspace:*",
+    "react-router": "8.5.2"
   }
 }

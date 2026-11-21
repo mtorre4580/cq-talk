@@ -19,7 +19,9 @@
     ]
   },
   "dependencies": {
-    "@cq-talk/platform": "workspace:*"
+    "@cq-talk/platform": "workspace:*",
+    "@cq-talk/qso": "workspace:*",
+    "idb-keyval": "^6.3.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"

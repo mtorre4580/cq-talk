@@ -1,7 +1,8 @@
+import { Link } from 'react-router';
 import { isLocale, locales, useI18n } from '@cq-talk/i18n';
 
 const linkClass =
-  'min-h-6 cursor-pointer border-0 bg-transparent p-0 font-body text-[13px] text-link underline hover:text-link-hover';
+  'inline-flex min-h-6 cursor-pointer items-center border-0 bg-transparent p-0 font-body text-[13px] text-link underline hover:text-link-hover';
 
 interface FooterProps {
   onOpenSettings: () => void;
@@ -16,10 +17,9 @@ export const Footer = ({ onOpenSettings }: FooterProps) => {
       <button type="button" onClick={onOpenSettings} className={linkClass}>
         {t('footer.settings')}
       </button>
-      {/* Opens the logbook in PR 11 */}
-      <button type="button" className={linkClass}>
+      <Link to="/qsl" className={linkClass}>
         {t('footer.logbook')}
-      </button>
+      </Link>
       <label className="flex items-center gap-2">
         <span className="sr-only">{t('footer.language')}</span>
         <select

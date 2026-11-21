@@ -36,12 +36,12 @@ it: colors, sizes, fonts, copy, animations and sounds.
 | Language | Strict TypeScript 6.0 | Pinned below 7 until `typescript-eslint` supports it (its peer range is `<6.1`) |
 | Styling | Tailwind CSS v4 (`@tailwindcss/vite`), **without Preflight** | Tokens in `libs/ui/src/theme.css` via `@theme`. The prototype renders on browser defaults (content-box, normal line height), so Preflight would shift every size |
 | Fonts | `@fontsource` packages | Oswald, Share Tech Mono, Courier Prime, Special Elite. Self-hosted, no Google Fonts |
-| Routing | React Router (library mode) | From PR 11 (`/`, `/qsl/:id`) |
+| Routing | React Router 8 (library mode, `BrowserRouter`) | `/` radio, `/qsl` Mis QSL, `/qsl/:id` a saved card; basename from Vite's `BASE_URL` |
 | i18n | Custom: Context + typed dictionaries in `libs/i18n` | `es` (default, source of truth), `en`, `pt-BR`; no dependencies |
 | AI | `@anthropic-ai/sdk` in the browser + `zod` | `claude-opus-5-5` by default, configurable. Structured outputs for corrections and the report |
 | Speech | Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Behind interfaces in `libs/speech`, with a typed fallback |
 | Sound effects | Web Audio, synthesized | No audio files. `libs/audio` |
-| Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log) | Always through `storage` from `@cq-talk/platform` (never throws); keys prefixed `cq-talk:` |
+| Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log, `createLogbook`, database `cq-talk` / store `qsl-log`) | Always through `storage` from `@cq-talk/platform` (never throws); keys prefixed `cq-talk:` |
 | PWA | `vite-plugin-pwa` | From PR 12 |
 | Unit tests | Vitest 5 + React Testing Library + user-event + jsdom | Inferred `test` target per project |
 | Browser tests | Playwright + `@axe-core/playwright` | `apps/web-e2e`, against the production build, desktop (1280×900) and phone (Pixel 7) |
@@ -92,7 +92,8 @@ libs/                    # added PR by PR; see docs/PLAN.md
                          #                    (createClient, checkApiKey, ClaudeEngine) loaded with import()
   storage/               # type:data-access · settings, API key, QSL logbook
   features/
-    tuner/ call/ report/ settings/ logbook/   # type:feature · screens
+    tuner/ call/ report/ settings/ logbook/   # type:feature · screens (features never import
+                                              # each other: the app composes them)
 tools/
   prototype/render.mjs   # renders the prototype to static HTML for a given state
 docs/
@@ -333,7 +334,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 8 — API key and model settings
 - [x] 9 — Speech input and output
 - [x] 10 — Live Claude operator
-- [ ] 11 — QSL logbook and PDF export
+- [x] 11 — QSL logbook and PDF export
 - [ ] 12 — Installable PWA
 
 See `docs/PLAN.md` for the details of each phase.
