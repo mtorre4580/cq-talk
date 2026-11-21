@@ -45,4 +45,22 @@ describe('useOperatorVoice', () => {
     expect(output.cancel).toHaveBeenCalled();
     rerender({ enabled: true });
   });
+
+  it('reads a streamed line only once it is complete', async () => {
+    const { output, said } = fakeVoice();
+    const onDone = vi.fn();
+    const first = { id: 'op-1', who: 'operator' as const, text: 'Copy that,' };
+    const { rerender } = renderHook(
+      ({ log, streamingId }) =>
+        useOperatorVoice(log, { enabled: true, hiss: () => () => {}, streamingId, onDone, output }),
+      { initialProps: { log: [first], streamingId: 'op-1' as string | null } },
+    );
+    expect(said).toEqual([]);
+    rerender({
+      log: [{ ...first, text: 'Copy that, great topic. What do you think? Over.' }],
+      streamingId: null,
+    });
+    await vi.waitFor(() => expect(onDone).toHaveBeenCalledWith('op-1'));
+    expect(said).toEqual(['Copy that, great topic. What do you think? Over.']);
+  });
 });

@@ -88,19 +88,24 @@ export const RadioPage = () => {
   const { state } = qso;
   const onAir = isOnAir(state);
   const log = conversationLog(state);
-  const [speaking, setSpeaking] = useState(false);
+  const lastOperator = log.findLast((entry) => entry.who === 'operator');
+  const [voiceDoneId, setVoiceDoneId] = useState<string | null>(null);
   useOperatorVoice(log, {
     enabled: sound.soundOn && onAir,
     hiss: sound.hiss,
-    onSpeaking: setSpeaking,
+    streamingId: state.operatorTalking ? (lastOperator?.id ?? null) : null,
+    onDone: setVoiceDoneId,
   });
+  // Half-duplex: the microphone stays closed until the operator's last line has been read out
+  const voicePending =
+    state.mode === 'live' && onAir && lastOperator !== undefined && lastOperator.id !== voiceDoneId;
   const live = useLiveOperator({
     state,
     dispatch: qso.dispatch,
     apiKey: settings.apiKey,
     model: settings.model,
     locale,
-    speaking,
+    speaking: voicePending,
   });
 
   return (
