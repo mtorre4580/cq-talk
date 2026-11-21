@@ -47,6 +47,23 @@ export const es = {
     toronto: 'Toronto, Canadá',
     helsinki: 'Helsinki, Finlandia',
   },
+  call: {
+    inContact: 'EN CONTACTO CON',
+    operator: '{place} · operador IA',
+    status: {
+      tuning: 'Sintonizando…',
+      yourTurn: 'Recibiendo · tu turno',
+      transmitting: 'Transmitiendo…',
+      closing: '73 · cerrando…',
+    },
+    clock: 'Duración',
+  },
+  log: {
+    title: 'LOG DE LA CONVERSACIÓN',
+    you: 'VOS',
+    better: '✎ Mejor: {text}',
+    ok: '✓ Copiado 5 y 9: bien dicho',
+  },
   report: {
     newQso: 'NUEVO QSO',
   },

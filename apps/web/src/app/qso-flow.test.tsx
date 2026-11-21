@@ -58,6 +58,26 @@ describe('QSO flow', () => {
     expect(screen.getByText('MIC ON')).toBeInTheDocument();
   });
 
+  it('runs the demo QSO with the prototype timing', async () => {
+    const user = setup();
+    await user.type(screen.getByLabelText('¿De qué querés hablar?'), 'Mundial 2026{Enter}');
+    expect(screen.getByRole('status')).toHaveTextContent('Sintonizando…');
+    expect(screen.getByText('EN CONTACTO CON')).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.getByText('00:03')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Recibiendo · tu turno');
+    expect(
+      screen.getByText(/So, Mundial 2026 — what’s your take on it\? Over\./),
+    ).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(3000));
+    expect(screen.getByRole('status')).toHaveTextContent('Transmitiendo…');
+    expect(
+      screen.getByText(/✎ Mejor: I think it’s a really interesting topic/),
+    ).toBeInTheDocument();
+  });
+
   it('does not call without a topic', async () => {
     const user = setup();
     await user.click(screen.getByRole('button', { name: 'LLAMAR · CQ' }));

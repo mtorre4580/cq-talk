@@ -203,8 +203,10 @@ interface ConversationEngine {
 }
 ```
 
-- `DemoEngine` replays the prototype's script with its timing. It is used without a key, in
-  unit and browser tests, and to record media.
+- **Demo mode** replays the prototype's script with its timing (`demoScript` + `demoLinesAt` in
+  `libs/qso`; first line at 3 s, then one every 3 s, seven lines). It is pure: in `demo` mode
+  `conversationLog(state)` derives the log from the clock, so it needs no engine. It is used
+  without a key, in unit and browser tests, and to record media.
 - `ClaudeEngine` (`libs/claude`) uses `@anthropic-ai/sdk` with `dangerouslyAllowBrowser: true`
   (bring-your-own-key). Model from settings, `claude-opus-5-5` by default. `reply` streams at low
   effort; `assess` and `close` use structured outputs (`messages.parse` + `zodOutputFormat`).
@@ -292,7 +294,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 3 — Radio rig components
 - [x] 4 — Tuner home screen
 - [x] 5 — Radio sound effects
-- [ ] 6 — Call screen with demo operator
+- [x] 6 — Call screen with demo operator
 - [ ] 7 — QSL report card (app matches the prototype)
 - [ ] 8 — API key and model settings
 - [ ] 9 — Speech input and output

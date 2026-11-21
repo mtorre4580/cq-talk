@@ -1,3 +1,5 @@
+import type { CallStatus, LogEntry } from './conversation';
+import { demoLinesAt, demoScript } from './demo';
 import { HOME_FREQ, HOME_POSITION } from './presets';
 import type { Preset } from './presets';
 import { STATIONS } from './stations';
@@ -5,6 +7,9 @@ import type { Station } from './stations';
 import { tuneTopic } from './tuning';
 
 export type Screen = 'home' | 'call' | 'report';
+
+/** `demo` replays the prototype's script; `live` talks to a real operator (PR 10). */
+export type QsoMode = 'demo' | 'live';
 
 /** Everything the screens need to know about the current QSO (contact). */
 export interface QsoState {
@@ -21,6 +26,9 @@ export interface QsoState {
   elapsed: number;
   /** The microphone was switched off and the QSL card is printing */
   closing: boolean;
+  mode: QsoMode;
+  /** Live transmissions; in demo mode the log is derived from the script and the clock */
+  log: LogEntry[];
 }
 
 export type QsoAction =
@@ -42,6 +50,8 @@ export const initialQso: QsoState = {
   station: STATIONS[0] as Station,
   elapsed: 0,
   closing: false,
+  mode: 'demo',
+  log: [],
 };
 
 /** Pure state machine: home → call → (closing) → report → home. */
@@ -67,6 +77,7 @@ export const qsoReducer = (state: QsoState, action: QsoAction): QsoState => {
         station: tuning.station,
         elapsed: 0,
         closing: false,
+        log: [],
       };
     }
 
@@ -84,7 +95,7 @@ export const qsoReducer = (state: QsoState, action: QsoAction): QsoState => {
         : state;
 
     case 'restart':
-      return { ...initialQso, freq: state.freq, position: state.position };
+      return { ...initialQso, freq: state.freq, position: state.position, mode: state.mode };
   }
 };
 
@@ -98,3 +109,18 @@ export const skyGlow = (state: QsoState): SkyGlow =>
 export type MicState = 'off' | 'on' | 'closing';
 export const micState = (state: QsoState): MicState =>
   isOnAir(state) ? 'on' : state.screen === 'call' && state.closing ? 'closing' : 'off';
+
+/** Every transmission so far, oldest first. */
+export const conversationLog = (state: QsoState): LogEntry[] =>
+  state.mode === 'demo'
+    ? demoScript(state.topic, state.station.call).slice(0, demoLinesAt(state.elapsed))
+    : state.log;
+
+/** The status line under the clock, as in the prototype. */
+export const callStatus = (state: QsoState): CallStatus => {
+  if (state.closing) return 'closing';
+  const log = conversationLog(state);
+  const last = log[log.length - 1];
+  if (!last) return 'tuning';
+  return last.who === 'operator' ? 'your-turn' : 'transmitting';
+};
