@@ -34,7 +34,7 @@ it: colors, sizes, fonts, copy, animations and sounds.
 | Build | Vite 8 + `@vitejs/plugin-react` | `apps/web/vite.config.mts` |
 | UI | React 19 | Function components and hooks only |
 | Language | Strict TypeScript 6.0 | Pinned below 7 until `typescript-eslint` supports it (its peer range is `<6.1`) |
-| Styling | Tailwind CSS v4 (`@tailwindcss/vite`) | Tokens in `libs/ui/src/theme.css` via `@theme` (from PR 2) |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite`), **without Preflight** | Tokens in `libs/ui/src/theme.css` via `@theme`. The prototype renders on browser defaults (content-box, normal line height), so Preflight would shift every size |
 | Fonts | `@fontsource` packages | Oswald, Share Tech Mono, Courier Prime, Special Elite. Self-hosted, no Google Fonts |
 | Routing | React Router (library mode) | From PR 11 (`/`, `/qsl/:id`) |
 | i18n | Custom: Context + typed dictionaries in `libs/i18n` | `es` (default, source of truth), `en`, `pt-BR`; no dependencies |
@@ -92,6 +92,8 @@ libs/                    # added PR by PR; see docs/PLAN.md
   storage/               # type:data-access · settings, API key, QSL logbook
   features/
     tuner/ call/ report/ settings/ logbook/   # type:feature · screens
+tools/
+  prototype/render.mjs   # renders the prototype to static HTML for a given state
 docs/
   PLAN.md                # PR roadmap and phase details
   prototype/             # design prototype (visual source of truth)
@@ -153,6 +155,11 @@ theme in the prototype).
 `text-amber`, `bg-rig-chassis`, `text-paper-ink`, `font-label`, `font-readout`…). Tailwind's
 default colors and fonts are cleared, so only these exist. The aurora uses the `cq-aurora-*`
 component classes; one global `prefers-reduced-motion` rule stops every animation and transition.
+
+**Matching the prototype**: `pnpm prototype:render out.html '{"screen":"home","pos":44}'` renders
+the prototype to static HTML for any state of its component (see `tools/prototype/render.mjs`).
+Serve it next to `pnpm dev` and compare element boxes at 1280 and 390 px. Copy sizes as
+arbitrary values (`text-[13px]`, `p-[22px]`) rather than rounding to the nearest Tailwind step.
 
 **Typography**: Special Elite (brand plate, QSL title and stamp), Oswald (labels, buttons,
 letter-spaced caps), Share Tech Mono (frequencies, display, clock), Courier Prime (body text).
@@ -276,7 +283,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 
 - [x] 1 — Bootstrap (Nx workspace, tooling, CI, Pages)
 - [x] 2 — Night sky theme and i18n
-- [ ] 3 — Radio rig components
+- [x] 3 — Radio rig components
 - [ ] 4 — Tuner home screen
 - [ ] 5 — Radio sound effects
 - [ ] 6 — Call screen with demo operator

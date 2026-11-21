@@ -1,4 +1,11 @@
-@import 'tailwindcss';
+/*
+ * Tailwind without Preflight: the prototype renders on the browser's default styles
+ * (content-box sizing, normal line height), so resetting them would shift every measurement.
+ * libs/ui/src/theme.css adds the few base rules the prototype sets itself.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
 @import '@cq-talk/ui/theme.css';
 
 /* Workspace libraries live outside this app's root: scan them for class names too */

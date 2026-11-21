@@ -25,7 +25,8 @@
     "check": "nx sync:check && nx run-many -t lint typecheck test build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prototype:render": "node tools/prototype/render.mjs"
   },
   "dependencies": {
     "react": "19.3.1",
