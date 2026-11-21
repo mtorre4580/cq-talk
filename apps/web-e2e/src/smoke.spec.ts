@@ -11,7 +11,8 @@ test.beforeEach(async ({ page }) => {
 
 test('home loads and has no WCAG 2.2 AA violations', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { level: 1, name: 'CQ talk' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'CQ talk' })).toBeAttached();
+  await expect(page.getByRole('contentinfo')).toBeVisible();
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(', ')}`)).toEqual([]);
 });

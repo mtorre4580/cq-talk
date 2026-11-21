@@ -1,0 +1,233 @@
+/*
+ * CQ talk design tokens. Every value comes from docs/prototype/Main.dc.html.
+ * Import after `@import 'tailwindcss'` so these tokens replace Tailwind's defaults.
+ */
+
+/* Self-hosted fonts (latin subset covers Spanish and Portuguese) */
+@import '@fontsource/courier-prime/latin-400.css';
+@import '@fontsource/courier-prime/latin-700.css';
+@import '@fontsource/oswald/latin-400.css';
+@import '@fontsource/oswald/latin-500.css';
+@import '@fontsource/oswald/latin-600.css';
+@import '@fontsource/share-tech-mono/latin-400.css';
+@import '@fontsource/special-elite/latin-400.css';
+
+@theme {
+  /* Only our palette: no stray Tailwind colors */
+  --color-*: initial;
+
+  /* Night sky and page text */
+  --color-night: #05080d;
+  --color-star: #e8f1ff;
+  --color-night-text: #e8e4d8;
+  --color-night-muted: #b8c4be;
+  --color-night-label: #e8ece8;
+  --color-link: #9fe8c8;
+  --color-link-hover: #d2ffea;
+
+  /* Rig: painted metal, enamel plates, keys and controls */
+  --color-rig-body: #1a1d1b;
+  --color-rig-chassis: #46564f;
+  --color-rig-border: #5e7068;
+  --color-rig-highlight: #6f8279;
+  --color-plate: #c9ccc4;
+  --color-plate-ink: #1f2421;
+  --color-plate-shine: #eef0ea;
+  --color-key: #d6d3c6;
+  --color-key-hover: #e4e1d6;
+  --color-key-shadow: #6e716b;
+  --color-control: #2e3833;
+  --color-control-border: #2a322e;
+  --color-control-text: #dce3de;
+  --color-knob: #2a2e2b;
+  --color-chrome-edge: #7e837d;
+  --color-chrome-stem: #9ea39c;
+  --color-grille-off: #5a5f5b;
+
+  /* Amber dial, call button and frequency ink */
+  --color-amber: #ffb347;
+  --color-amber-hover: #ffc46b;
+  --color-amber-shadow: #8a4e12;
+  --color-amber-mid: #d9781e;
+  --color-amber-deep: #5a2a08;
+  --color-amber-ink: #2a1606;
+  --color-needle: #b0130a;
+  --color-freq-ink: #6b3a0c;
+
+  /* Display (topic input, station panel) */
+  --color-display: #120d08;
+  --color-display-muted: #c9a06a;
+  --color-display-placeholder: #a8763a;
+
+  /* S meter */
+  --color-meter: #f1e7cc;
+  --color-meter-ink: #2a2620;
+  --color-meter-label: #5a5246;
+  --color-meter-red: #b42318;
+  --color-meter-needle: #1a1814;
+
+  /* Lamps and LEDs */
+  --color-lamp-on: #ff4a2e;
+  --color-lamp-off: #4a1c17;
+  --color-led-on: #6cffb8;
+  --color-led-off: #24302b;
+
+  /* Paper log */
+  --color-paper: #f1e7cc;
+  --color-paper-ink: #2a2620;
+  --color-paper-muted: #5a5246;
+  --color-operator: #7a4a12;
+  --color-fix: #a3261b;
+  --color-ok: #2f5b2a;
+
+  /* QSL card */
+  --color-qsl: #f3ead3;
+  --color-qsl-ink: #2a211b;
+  --color-qsl-muted: #5a4a3a;
+  --color-qsl-body: #3e342b;
+  --color-stamp: #a3261b;
+
+  /* Typography */
+  --font-*: initial;
+  --font-body: 'Courier Prime', 'Courier New', monospace;
+  --font-label: 'Oswald', sans-serif;
+  --font-readout: 'Share Tech Mono', monospace;
+  --font-display: 'Special Elite', serif;
+
+  /* Motion */
+  --animate-twinkle: twinkle 3s ease-in-out infinite;
+  --animate-lamp: lamp 1.6s ease-in-out infinite;
+  --animate-fadein: fadein 0.5s ease-out;
+  --ease-spring: cubic-bezier(0.4, 1.3, 0.6, 1);
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+  @keyframes lamp {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+  @keyframes fadein {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-night);
+    color: var(--color-night-text);
+    font-family: var(--font-body);
+  }
+  a {
+    color: var(--color-link);
+  }
+  a:hover {
+    color: var(--color-link-hover);
+  }
+}
+
+/* Aurora: three blurred, screen-blended ellipses drifting at different speeds */
+@layer components {
+  .cq-aurora {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .cq-aurora-1 {
+    left: -10%;
+    top: -18%;
+    width: 70%;
+    height: 46%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(70, 255, 170, 0.75),
+      rgba(70, 255, 170, 0) 65%
+    );
+    transform: rotate(-8deg);
+    animation: cq-drift1 16s ease-in-out infinite alternate;
+  }
+  .cq-aurora-2 {
+    left: 30%;
+    top: -22%;
+    width: 65%;
+    height: 42%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(150, 90, 255, 0.6),
+      rgba(150, 90, 255, 0) 65%
+    );
+    transform: rotate(6deg);
+    animation: cq-drift2 19s ease-in-out infinite alternate;
+  }
+  .cq-aurora-3 {
+    left: 10%;
+    top: -4%;
+    width: 85%;
+    height: 20%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(60, 220, 230, 0.55),
+      rgba(60, 220, 230, 0) 70%
+    );
+    animation: cq-drift3 12s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes cq-drift1 {
+  from {
+    transform: translateX(-4%) rotate(-10deg) scaleY(0.9);
+  }
+  to {
+    transform: translateX(8%) rotate(-3deg) scaleY(1.15);
+  }
+}
+@keyframes cq-drift2 {
+  from {
+    transform: translateX(6%) rotate(8deg);
+  }
+  to {
+    transform: translateX(-8%) rotate(2deg) scaleY(1.2);
+  }
+}
+@keyframes cq-drift3 {
+  from {
+    transform: translateX(-6%) scaleX(0.9);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(6%) scaleX(1.1);
+    opacity: 1;
+  }
+}
+
+/* Decorative motion stops for people who ask the OS for less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

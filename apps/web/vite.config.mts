@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 // GitHub Pages serves the project at /cq-talk/
 const PAGES_BASE = '/cq-talk/';
@@ -9,7 +10,7 @@ export default defineConfig(({ command, isPreview }) => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/web',
   base: command === 'build' || isPreview ? PAGES_BASE : '/',
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: { port: 4200, host: 'localhost' },
   preview: { port: 4300, host: 'localhost' },
   build: {

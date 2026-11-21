@@ -41,7 +41,7 @@ it: colors, sizes, fonts, copy, animations and sounds.
 | AI | `@anthropic-ai/sdk` in the browser + `zod` | `claude-opus-5-5` by default, configurable. Structured outputs for corrections and the report |
 | Speech | Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Behind interfaces in `libs/speech`, with a typed fallback |
 | Sound effects | Web Audio, synthesized | No audio files. `libs/audio` |
-| Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log) | Always wrapped in try/catch |
+| Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log) | Always through `storage` from `@cq-talk/platform` (never throws); keys prefixed `cq-talk:` |
 | PWA | `vite-plugin-pwa` | From PR 12 |
 | Unit tests | Vitest 5 + React Testing Library + user-event + jsdom | Inferred `test` target per project |
 | Browser tests | Playwright + `@axe-core/playwright` | `apps/web-e2e`, against the production build, desktop (1280×900) and phone (Pixel 7) |
@@ -82,6 +82,7 @@ apps/
   web-e2e/               # type:e2e  · Playwright specs
 libs/                    # added PR by PR; see docs/PLAN.md
   ui/                    # type:ui          · theme.css, NightSky, rig components, QslCard
+  platform/              # type:util        · safe storage, usePrefersReducedMotion, browser helpers
   i18n/                  # type:util        · I18nProvider, useI18n, messages/{es,en,pt-BR}.ts
   audio/                 # type:util        · radio sound effects, useSound
   speech/                # type:util        · SpeechInput / SpeechOutput, capability detection
@@ -147,6 +148,11 @@ theme in the prototype).
 | Paper (log) | `#F1E7CC`, ink `#2A2620`, operator `#7A4A12`, fix `#A3261B`, ok `#2F5B2A` |
 | QSL card | `#F3EAD3`, ink `#2A211B`, muted `#5A4A3A`, stamp `#A3261B` |
 | Aurora | green `rgba(70,255,170,.75)`, violet `rgba(150,90,255,.6)`, cyan `rgba(60,220,230,.55)` |
+
+**Tokens in code**: `libs/ui/src/theme.css` turns the palette into Tailwind utilities (`bg-night`,
+`text-amber`, `bg-rig-chassis`, `text-paper-ink`, `font-label`, `font-readout`…). Tailwind's
+default colors and fonts are cleared, so only these exist. The aurora uses the `cq-aurora-*`
+component classes; one global `prefers-reduced-motion` rule stops every animation and transition.
 
 **Typography**: Special Elite (brand plate, QSL title and stamp), Oswald (labels, buttons,
 letter-spaced caps), Share Tech Mono (frequencies, display, clock), Courier Prime (body text).
@@ -233,7 +239,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - **No deprecated APIs** in any new or changed code. `@typescript-eslint/no-deprecated`
   enforces it for typed code; before committing or opening a PR, run the `check-deprecations`
   skill (`.claude/skills/`) to cover what the linter cannot see.
-- Storage keys are prefixed `cq-talk:`.
+- Storage keys are prefixed `cq-talk:` by `storage` (`@cq-talk/platform`); pass the bare name (`storage.get('locale')`).
 
 ## Testing
 
@@ -268,8 +274,8 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 
 ## Status
 
-- [ ] 1 — Bootstrap (Nx workspace, tooling, CI, Pages)
-- [ ] 2 — Night sky theme and i18n
+- [x] 1 — Bootstrap (Nx workspace, tooling, CI, Pages)
+- [x] 2 — Night sky theme and i18n
 - [ ] 3 — Radio rig components
 - [ ] 4 — Tuner home screen
 - [ ] 5 — Radio sound effects

@@ -1,7 +1,5 @@
-/* Placeholder until the design tokens land (see docs/PLAN.md, PR 2) */
-body {
-  margin: 0;
-  background: #05080d;
-  color: #e8e4d8;
-  font-family: 'Courier Prime', 'Courier New', monospace;
-}
+@import 'tailwindcss';
+@import '@cq-talk/ui/theme.css';
+
+/* Workspace libraries live outside this app's root: scan them for class names too */
+@source '../../../libs';

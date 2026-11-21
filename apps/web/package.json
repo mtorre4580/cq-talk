@@ -9,5 +9,10 @@
       "type:app",
       "scope:web"
     ]
+  },
+  "dependencies": {
+    "@cq-talk/i18n": "workspace:*",
+    "@cq-talk/platform": "workspace:*",
+    "@cq-talk/ui": "workspace:*"
   }
 }
