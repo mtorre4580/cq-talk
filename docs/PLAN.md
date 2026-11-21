@@ -67,7 +67,8 @@ and timing (first line at 3 s, then one every 3 s, 7 lines, log shows the last 4
 ### 7. QSL report
 
 `libs/features/report`: QSL card (fields grid, errors, vocabulary, practice), "Nuevo QSO".
-End-to-end flow in Playwright, axe in every screen, visual snapshots at 1280 px and 390 px.
+End-to-end flow in Playwright with a fake clock, axe in every screen, and a layout-parity spec
+that checks element boxes against the rendered prototype at 1280×900 (±2 px).
 
 ### 8. Settings
 

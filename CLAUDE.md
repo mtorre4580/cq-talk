@@ -264,9 +264,16 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   `AudioContext` (`installFakeAudioContext()`) that records which nodes started.
 - Engines: `DemoEngine` is tested directly; `ClaudeEngine` with a mocked SDK client (no network
   in tests, ever).
-- Browser tests (`apps/web-e2e`) run in demo mode, with `prefers-reduced-motion: reduce` for
-  audits, at desktop and phone size: axe has no violations, the flow works end to end and the
-  page never scrolls horizontally. Visual snapshots arrive in PR 7.
+- Browser tests (`apps/web-e2e`) run in demo mode, at desktop and phone size, with Playwright's
+  fake clock (`page.clock`) so the QSO timing is deterministic: axe has no violations on any
+  screen, the flow works end to end and the page never scrolls horizontally. `openApp()` in
+  `src/support.ts` sets Spanish, mutes the sound and switches CSS animations off (the fake clock
+  freezes them on their first frame). Advance the clock in separate steps when a timer starts
+  another one, so React can register the second.
+- **Layout parity** (`layout-parity.spec.ts`): element boxes measured on the rendered prototype
+  at 1280×900; the app must land within ±2 px on every screen. Layout changes that move these
+  boxes on purpose must update the numbers and say why in the PR. Boxes are used instead of
+  image snapshots because font rasterization differs between macOS and the Linux CI.
 - A PR is not merged with failing checks.
 
 ## Git
@@ -295,7 +302,7 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 4 — Tuner home screen
 - [x] 5 — Radio sound effects
 - [x] 6 — Call screen with demo operator
-- [ ] 7 — QSL report card (app matches the prototype)
+- [x] 7 — QSL report card (app matches the prototype)
 - [ ] 8 — API key and model settings
 - [ ] 9 — Speech input and output
 - [ ] 10 — Live Claude operator

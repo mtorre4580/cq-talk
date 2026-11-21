@@ -16,6 +16,7 @@
     "@cq-talk/i18n": "workspace:*",
     "@cq-talk/platform": "workspace:*",
     "@cq-talk/qso": "workspace:*",
+    "@cq-talk/report": "workspace:*",
     "@cq-talk/tuner": "workspace:*",
     "@cq-talk/ui": "workspace:*"
   }
