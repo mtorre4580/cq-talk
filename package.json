@@ -1,0 +1,71 @@
+{
+  "name": "@cq-talk/source",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Practice spoken English on the air: tune a topic, talk with an AI radio operator and get a QSL card with your corrections.",
+  "homepage": "https://mtorre4580.github.io/cq-talk/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtorre4580/cq-talk.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "nx run @cq-talk/web:dev",
+    "build": "nx run @cq-talk/web:build",
+    "preview": "nx run @cq-talk/web:preview",
+    "test": "nx run-many -t test",
+    "lint": "nx run-many -t lint",
+    "typecheck": "nx run-many -t typecheck",
+    "e2e": "nx run @cq-talk/web-e2e:e2e",
+    "check": "nx sync:check && nx run-many -t lint typecheck test build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@eslint/js": "^10.0.1",
+    "@nx/devkit": "24.0.6",
+    "@nx/eslint": "24.0.6",
+    "@nx/eslint-plugin": "24.0.6",
+    "@nx/js": "24.0.6",
+    "@nx/playwright": "24.0.6",
+    "@nx/vite": "24.0.6",
+    "@nx/vitest": "24.0.6",
+    "@playwright/test": "1.65.1",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^8.0.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.13",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "@vitest/coverage-v8": "^5.1.1",
+    "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.8",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.7.0",
+    "jsdom": "^31.0.1",
+    "nx": "24.0.6",
+    "prettier": "^3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vite": "8.3.8",
+    "vitest": "^5.1.1"
+  }
+}

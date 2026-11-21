@@ -1,0 +1,13 @@
+{
+  "name": "@cq-talk/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "projectType": "application",
+    "tags": [
+      "type:app",
+      "scope:web"
+    ]
+  }
+}

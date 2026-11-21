@@ -1,0 +1,7 @@
+/* Placeholder until the design tokens land (see docs/PLAN.md, PR 2) */
+body {
+  margin: 0;
+  background: #05080d;
+  color: #e8e4d8;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+}

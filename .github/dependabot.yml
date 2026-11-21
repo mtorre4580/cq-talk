@@ -1,0 +1,43 @@
+version: 2
+updates:
+  # npm ecosystem: Dependabot detects pnpm from pnpm-lock.yaml
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      nx:
+        # Nx packages must move together (`nx migrate` handles major versions)
+        patterns: ['nx', '@nx/*']
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom', 'react-router']
+      vite-vitest:
+        patterns: ['vite', '@vitejs/*', 'vitest', '@vitest/*', '@tailwindcss/vite', 'tailwindcss']
+      lint-format:
+        patterns: ['eslint', '@eslint/*', 'eslint-*', 'typescript-eslint', 'prettier', 'globals']
+      testing:
+        patterns: ['@testing-library/*', 'jsdom', '@playwright/test', '@axe-core/*']
+      # Everything else: minor and patch updates in a single PR
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+    ignore:
+      # typescript-eslint supports TypeScript < 6.1; bump together once it supports 7
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions:
+        patterns: ['*']

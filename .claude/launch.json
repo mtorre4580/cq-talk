@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 4200
+    },
+    {
+      "name": "web-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["nx", "run", "@cq-talk/web:preview"],
+      "port": 4300,
+      "url": "http://localhost:4300"
+    }
+  ]
+}

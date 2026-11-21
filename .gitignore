@@ -1,0 +1,25 @@
+node_modules
+dist
+out-tsc
+test-output
+coverage
+*.tsbuildinfo
+*.local
+.DS_Store
+.vite
+.vitest
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+# Nx
+.nx/cache
+.nx/workspace-data
+
+# Browser tests and Lighthouse output
+.lighthouseci
+playwright-report
+test-results
+
+# Claude Code: local-only settings and worktrees
+.claude/settings.local.json
+.claude/worktrees
