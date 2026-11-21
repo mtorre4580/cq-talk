@@ -43,4 +43,19 @@ describe('TransmitPanel', () => {
     setup({ notice: 'not-allowed' });
     expect(screen.getByText(/Sin permiso para el micrófono/)).toBeInTheDocument();
   });
+
+  it('explains a live error and offers a retry when it can help', async () => {
+    const onRetry = vi.fn();
+    const { user } = setup({ error: 'offline', onRetry });
+    expect(
+      screen.getByText('Se cortó la conexión: revisá tu red y reintentá.'),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'REINTENTAR' }));
+    expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it('does not offer a retry for a rejected key', () => {
+    setup({ error: 'key', onRetry: vi.fn() });
+    expect(screen.queryByRole('button', { name: 'REINTENTAR' })).not.toBeInTheDocument();
+  });
 });

@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import { useI18n } from '@cq-talk/i18n';
 import type { TranslationKey } from '@cq-talk/i18n';
+import type { LiveError } from '@cq-talk/qso';
 
 /** Why the microphone is not in use, if it is not. */
 export type TransmitNotice = 'unsupported' | 'not-allowed' | 'no-microphone' | 'network';
@@ -16,7 +17,21 @@ export interface TransmitPanelProps {
   notice?: TransmitNotice | null;
   /** A typed transmission (always available, even when speech works) */
   onSend: (text: string) => void;
+  /** The live operator failed; `onRetry` repeats the last step */
+  error?: LiveError | null;
+  onRetry?: () => void;
 }
+
+const ERROR_KEY: Record<LiveError, TranslationKey> = {
+  key: 'live.error.key',
+  'rate-limit': 'live.error.rateLimit',
+  offline: 'live.error.offline',
+  refused: 'live.error.refused',
+  other: 'live.error.other',
+};
+
+/** Errors a retry can fix */
+const RETRYABLE: readonly LiveError[] = ['rate-limit', 'offline', 'other'];
 
 const NOTICE_KEY: Record<TransmitNotice, TranslationKey> = {
   unsupported: 'transmit.unsupported',
@@ -32,6 +47,8 @@ export const TransmitPanel = ({
   interim,
   notice,
   onSend,
+  error,
+  onRetry,
 }: TransmitPanelProps) => {
   const { t } = useI18n();
   const [draft, setDraft] = useState('');
@@ -44,23 +61,34 @@ export const TransmitPanel = ({
     setDraft('');
   };
 
-  const line = !yourTurn
-    ? t('transmit.waiting')
-    : notice
-      ? t(NOTICE_KEY[notice])
-      : listening
-        ? interim || t('transmit.listening')
-        : '';
+  const line = error
+    ? t(ERROR_KEY[error])
+    : !yourTurn
+      ? t('transmit.waiting')
+      : notice
+        ? t(NOTICE_KEY[notice])
+        : listening
+          ? interim || t('transmit.listening')
+          : '';
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2.5">
       <p
         aria-live="polite"
         lang={interim && listening ? 'en' : undefined}
-        className="m-0 min-h-5 font-readout text-[15px] text-display-muted"
+        className="m-0 min-h-5 font-readout text-[15px] text-control-text"
       >
         {line}
       </p>
+      {error && onRetry && RETRYABLE.includes(error) && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="min-h-11 cursor-pointer self-start rounded-md border border-control-border bg-control px-3 font-label text-[12px] tracking-[2px] text-control-text"
+        >
+          {t('live.retry')}
+        </button>
+      )}
       <div className="flex flex-wrap items-center gap-3.5">
         <label htmlFor={`${id}-text`} className="sr-only">
           {t('transmit.label')}

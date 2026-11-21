@@ -52,6 +52,7 @@ export const es = {
     operator: '{place} · operador IA',
     status: {
       tuning: 'Sintonizando…',
+      receiving: 'Recibiendo…',
       yourTurn: 'Recibiendo · tu turno',
       transmitting: 'Transmitiendo…',
       closing: '73 · cerrando…',
@@ -68,6 +69,17 @@ export const es = {
     notAllowed: 'Sin permiso para el micrófono: escribí tu respuesta o habilitalo en el navegador.',
     noMicrophone: 'No encontramos un micrófono: escribí tu respuesta.',
     network: 'El reconocimiento de voz no responde: escribí tu respuesta.',
+  },
+  live: {
+    error: {
+      key: 'Anthropic rechazó la key: revisala en Configurar key.',
+      rateLimit: 'Demasiadas llamadas a la API: esperá un momento y reintentá.',
+      offline: 'Se cortó la conexión: revisá tu red y reintentá.',
+      refused: 'El operador no puede seguir con este tema: probá otro QSO.',
+      other: 'Algo falló en la llamada: reintentá.',
+    },
+    retry: 'REINTENTAR',
+    noLessons: 'No pudimos escribir las lecciones de este QSO.',
   },
   log: {
     title: 'LOG DE LA CONVERSACIÓN',

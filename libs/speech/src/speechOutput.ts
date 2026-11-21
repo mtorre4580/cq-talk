@@ -124,11 +124,19 @@ export const createSpeechOutput = (
         voice = pickVoice(synth.getVoices());
       }
       await new Promise<void>((resolve) => {
+        // Some engines never fire `end` (Chrome on long lines): give up after a generous
+        // estimate so the user's turn always comes
+        const words = text.split(' ').length;
+        const fallback = setTimeout(done, 4000 + words * 600);
+        function done() {
+          clearTimeout(fallback);
+          resolve();
+        }
         const utterance = new Utterance(text);
         utterance.lang = 'en-US';
         if (voice) utterance.voice = voice;
-        utterance.onend = () => resolve();
-        utterance.onerror = () => resolve();
+        utterance.onend = done;
+        utterance.onerror = done;
         synth.speak(utterance);
       });
     },

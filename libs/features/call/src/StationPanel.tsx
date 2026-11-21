@@ -11,6 +11,7 @@ export interface StationPanelProps {
 
 const STATUS_KEY = {
   tuning: 'call.status.tuning',
+  receiving: 'call.status.receiving',
   'your-turn': 'call.status.yourTurn',
   transmitting: 'call.status.transmitting',
   closing: 'call.status.closing',

@@ -53,6 +53,7 @@ export const ptBR: Messages = {
     operator: '{place} · operador IA',
     status: {
       tuning: 'Sintonizando…',
+      receiving: 'Recebendo…',
       yourTurn: 'Recebendo · sua vez',
       transmitting: 'Transmitindo…',
       closing: '73 · encerrando…',
@@ -69,6 +70,17 @@ export const ptBR: Messages = {
     notAllowed: 'Sem permissão para o microfone: escreva sua resposta ou habilite no navegador.',
     noMicrophone: 'Não encontramos um microfone: escreva sua resposta.',
     network: 'O reconhecimento de voz não responde: escreva sua resposta.',
+  },
+  live: {
+    error: {
+      key: 'A Anthropic recusou a key: confira em Configurar key.',
+      rateLimit: 'Chamadas demais à API: espere um momento e tente de novo.',
+      offline: 'A conexão caiu: confira sua rede e tente de novo.',
+      refused: 'O operador não pode seguir com este tema: tente outro QSO.',
+      other: 'Algo falhou na chamada: tente de novo.',
+    },
+    retry: 'TENTAR DE NOVO',
+    noLessons: 'Não conseguimos escrever as lições deste QSO.',
   },
   log: {
     title: 'LOG DA CONVERSA',

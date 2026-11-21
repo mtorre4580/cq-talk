@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { initialQso, isOnAir, qsoReducer } from '@cq-talk/qso';
-import type { Preset } from '@cq-talk/qso';
+import type { Preset, QsoMode } from '@cq-talk/qso';
 
 /** Pause between pressing a weekly key and the call, so the needle travels first */
 export const PRESET_CALL_DELAY_MS = 750;
@@ -21,7 +21,7 @@ export interface QsoEffects {
  * Runs the QSO state machine and the timers around it. The reducer in `@cq-talk/qso` stays pure;
  * every timeout and interval lives here and is cleared on unmount.
  */
-export const useQso = (effects: QsoEffects = {}) => {
+export const useQso = (effects: QsoEffects = {}, mode: QsoMode = 'demo') => {
   const [state, dispatch] = useReducer(qsoReducer, initialQso);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
 
@@ -49,15 +49,17 @@ export const useQso = (effects: QsoEffects = {}) => {
 
   // Latest effects without re-creating every callback when they change
   const fx = useRef(effects);
+  const modeRef = useRef(mode);
   useEffect(() => {
     fx.current = effects;
+    modeRef.current = mode;
   });
 
   const call = useCallback((topic: string) => {
     if (!topic.trim()) return;
     fx.current.unlock?.();
     fx.current.tuneIn?.();
-    dispatch({ type: 'call', topic });
+    dispatch({ type: 'call', topic, mode: modeRef.current });
   }, []);
 
   const pickPreset = useCallback(
@@ -70,19 +72,29 @@ export const useQso = (effects: QsoEffects = {}) => {
           type: 'call',
           topic: label,
           tuning: { freq: preset.freq, position: preset.position },
+          mode: modeRef.current,
         });
       });
     },
     [later],
   );
 
-  const hangUp = useCallback(() => {
-    fx.current.off?.();
-    dispatch({ type: 'hang-up' });
-    later(CLOSING_DELAY_MS, () => dispatch({ type: 'closed' }));
-  }, [later]);
+  /** `pending`: work the QSL card waits for (the live report) besides the closing pause */
+  const hangUp = useCallback(
+    (pending?: Promise<unknown>) => {
+      fx.current.off?.();
+      dispatch({ type: 'hang-up' });
+      if (!pending) {
+        later(CLOSING_DELAY_MS, () => dispatch({ type: 'closed' }));
+        return;
+      }
+      const pause = new Promise<void>((resolve) => later(CLOSING_DELAY_MS, resolve));
+      void Promise.allSettled([pause, pending]).then(() => dispatch({ type: 'closed' }));
+    },
+    [later],
+  );
 
   const restart = useCallback(() => dispatch({ type: 'restart' }), []);
 
-  return { state, setQuery, call, pickPreset, hangUp, restart };
+  return { state, dispatch, setQuery, call, pickPreset, hangUp, restart };
 };
