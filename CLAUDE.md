@@ -299,6 +299,8 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   `src/support.ts` sets Spanish, mutes the sound and switches CSS animations off (the fake clock
   freezes them on their first frame). Advance the clock in separate steps when a timer starts
   another one, so React can register the second.
+- Service workers are blocked in every spec except `pwa.spec.ts`: once installed, the PWA's
+  worker answers routed test pages with the app shell.
 - The e2e target depends on `@cq-talk/web:build` and Playwright starts `vite preview` itself.
   Nx's inferred preview readiness check never settles with the PWA plugin, so do not point
   `webServer` back at `nx run @cq-talk/web:preview`.
