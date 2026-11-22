@@ -1,11 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '@cq-talk/i18n';
 import type { LogEntry } from '@cq-talk/qso';
+import { TypedText } from './TypedText';
 
 export interface ConversationLogProps {
   entries: readonly LogEntry[];
   /** Operator call sign, printed beside each of the operator's lines */
   call: string;
+  /** The operator's new lines type out like a teleprinter (off with reduced motion) */
+  typewriter?: boolean;
 }
 
 /**
@@ -13,8 +16,10 @@ export interface ConversationLogProps {
  * better way to say it. New lines flicker in and are announced politely; the list keeps the
  * latest line in view.
  */
-export const ConversationLog = ({ entries, call }: ConversationLogProps) => {
+export const ConversationLog = ({ entries, call, typewriter = false }: ConversationLogProps) => {
   const { t } = useI18n();
+  // Lines already on the log when it mounts are not typed again
+  const [initial] = useState(() => new Set(entries.map((entry) => entry.id)));
   const list = useRef<HTMLOListElement>(null);
   const last = entries[entries.length - 1];
 
@@ -36,7 +41,11 @@ export const ConversationLog = ({ entries, call }: ConversationLogProps) => {
           >
             <span className="cq-who">{entry.who === 'you' ? t('log.you') : call}</span>
             <p className="cq-text" lang="en">
-              {entry.text}
+              {typewriter && entry.who === 'operator' && !initial.has(entry.id) ? (
+                <TypedText text={entry.text} />
+              ) : (
+                entry.text
+              )}
             </p>
             {entry.assessment?.kind === 'fix' && (
               <p className="cq-note">{t('log.better', { text: entry.assessment.better })}</p>

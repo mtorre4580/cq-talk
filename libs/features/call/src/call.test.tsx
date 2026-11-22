@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@cq-talk/i18n';
 import type { Locale } from '@cq-talk/i18n';
 import { demoScript, STATIONS } from '@cq-talk/qso';
@@ -57,6 +57,29 @@ describe('ConversationLog', () => {
     const lines = screen.getAllByRole('listitem');
     expect(lines).toHaveLength(7);
     expect(lines[6]).toHaveTextContent('Can you give me a recent example?');
+  });
+
+  it('types the operator’s new lines out, but gives screen readers the whole line', () => {
+    vi.useFakeTimers();
+    const { rerender } = renderIn(<ConversationLog entries={[]} call="JA1·AI" typewriter />);
+    rerender(
+      <I18nProvider initial="es">
+        <ConversationLog entries={script.slice(0, 1)} call="JA1·AI" typewriter />
+      </I18nProvider>,
+    );
+    const line = script[0]!.text;
+    // Whole line for assistive technology, typed copy hidden from it
+    expect(screen.getByText(line)).toHaveClass('sr-only');
+    // One keystroke per timer: React schedules the next one after each render
+    for (let i = 0; i < line.length; i++) act(() => vi.advanceTimersByTime(60));
+    expect(screen.getByText(line)).not.toHaveClass('sr-only');
+    expect(screen.getByText(line).tagName).toBe('P');
+    vi.useRealTimers();
+  });
+
+  it('does not retype the lines already on the log', () => {
+    renderIn(<ConversationLog entries={script.slice(0, 1)} call="JA1·AI" typewriter />);
+    expect(screen.getByText(script[0]!.text).tagName).toBe('P');
   });
 
   it('marks the conversation as English for screen readers', () => {

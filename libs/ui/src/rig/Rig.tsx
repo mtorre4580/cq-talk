@@ -1,5 +1,7 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useRef } from 'react';
+import type { ReactNode } from 'react';
 import type { MicState } from './DeskMicrophone';
+import { VALVE_LEVELS, useValvePower } from './valve';
 
 export interface RigProps {
   /** Drives the valves: standby at home, full power on air, cooling down while closing */
@@ -10,28 +12,16 @@ export interface RigProps {
   microphone: ReactNode;
 }
 
-/** `--power` lights the dials, `--lamp` the ON AIR jewel, `--tally` the microphone's tally. */
-const LEVELS: Record<MicState, { power: number; lamp: number; tally: number }> = {
-  off: { power: 0.45, lamp: 0, tally: 0 },
-  on: { power: 1, lamp: 1, tally: 1 },
-  closing: { power: 0, lamp: 0, tally: 0 },
-};
-
-/** The desk set: receiver and microphone side by side; the microphone moves under it on phones. */
+/**
+ * The desk set: receiver and microphone side by side; the microphone moves under it on phones.
+ * Its `--power`, `--lamp` and `--tally` light the dials, the ON AIR jewel and the mic's tally,
+ * ramping like a valve set as the QSO starts and ends.
+ */
 export const Rig = ({ power, radio, microphone }: RigProps) => {
-  const level = LEVELS[power];
+  const deskset = useRef<HTMLDivElement>(null);
+  useValvePower(deskset, VALVE_LEVELS[power]);
   return (
-    <div
-      className="cq-deskset"
-      data-power={power}
-      style={
-        {
-          '--power': level.power,
-          '--lamp': level.lamp,
-          '--tally': level.tally,
-        } as CSSProperties
-      }
-    >
+    <div ref={deskset} className="cq-deskset" data-power={power}>
       {radio}
       <div>{microphone}</div>
     </div>

@@ -29,7 +29,10 @@ const noise = (ctx: AudioContext, seconds: number): AudioBufferSourceNode => {
   return source;
 };
 
-/** Static sweeping through the band, a heterodyne whistle and a beep when the signal locks. */
+/**
+ * Static sweeping through the band, a heterodyne whistle, a beep when the signal locks and the
+ * mains hum of the valves warming up.
+ */
 const tuneIn = (ctx: AudioContext) => {
   const t = ctx.currentTime + 0.02;
 
@@ -83,9 +86,33 @@ const tuneIn = (ctx: AudioContext) => {
   beep.connect(beepGain).connect(ctx.destination);
   beep.start(t + 3.0);
   beep.stop(t + 3.2);
+
+  mainsHum(ctx, t);
 };
 
-/** A short burst of high static and a low click: the microphone switching off. */
+/** The valves warming up: a 60 Hz mains hum and its harmonics swelling, then settling. */
+const mainsHum = (ctx: AudioContext, t: number) => {
+  const hum = ctx.createGain();
+  hum.gain.setValueAtTime(0, t);
+  hum.gain.linearRampToValueAtTime(0.06, t + 1.2);
+  hum.gain.exponentialRampToValueAtTime(0.0008, t + 3);
+  hum.connect(ctx.destination);
+  for (const [frequency, level] of [
+    [60, 0.5],
+    [120, 0.18],
+    [180, 0.18],
+  ] as const) {
+    const osc = ctx.createOscillator();
+    const harmonic = ctx.createGain();
+    osc.frequency.value = frequency;
+    harmonic.gain.value = level;
+    osc.connect(harmonic).connect(hum);
+    osc.start(t);
+    osc.stop(t + 3);
+  }
+};
+
+/** A short burst of high static, a low click and a sinking hum: the set switching off. */
 const off = (ctx: AudioContext) => {
   const t = ctx.currentTime + 0.02;
 
@@ -109,6 +136,17 @@ const off = (ctx: AudioContext) => {
   click.connect(clickGain).connect(ctx.destination);
   click.start(t);
   click.stop(t + 0.06);
+
+  // The valves cooling down: the hum sinks and fades with the dial light
+  const hum = ctx.createOscillator();
+  const humGain = ctx.createGain();
+  hum.frequency.setValueAtTime(120, t);
+  hum.frequency.exponentialRampToValueAtTime(40, t + 1.8);
+  humGain.gain.setValueAtTime(0.05, t);
+  humGain.gain.exponentialRampToValueAtTime(0.0005, t + 1.9);
+  hum.connect(humGain).connect(ctx.destination);
+  hum.start(t);
+  hum.stop(t + 2);
 };
 
 /** Soft band-limited static that loops under the operator's voice; returns a stop function. */
