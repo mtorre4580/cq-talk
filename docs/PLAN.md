@@ -18,6 +18,9 @@ its own and leaves `main` deployable.
 | 10 | `feat/claude-operator` | feat: add live claude operator | Real conversation: reply, per-turn corrections, report |
 | 11 | `feat/logbook` | feat: add qsl logbook and pdf export | "Mis QSL" history (IndexedDB), PDF download, share |
 | 12 | `feat/pwa` | feat: make the app an installable pwa | Manifest, icons, service worker, install prompt, Lighthouse |
+| 14 | `feat/radio-voice` | feat: add an elevenlabs operator voice through a radio filter | Natural operator voice (the user's own ElevenLabs key) |
+| 15 | `feat/realistic-rig` | feat: redesign the radio as a realistic receiver with a split call | Prototype v2: 1940s receiver, desk mic that calls, aurora rift split |
+| 16 | `feat/valve-power` | feat: warm the receiver up and down like a valve set | Power-up and power-down animations, typed operator lines, hum |
 
 After PR 12: media (README screenshots, Open Graph image, demo GIF and video recorded with
 Playwright in demo mode).
@@ -101,3 +104,20 @@ PDF download of the card, share as image with the Web Share API.
 
 `vite-plugin-pwa`: manifest, maskable icons, offline app shell, update prompt, install prompt,
 iOS meta tags. Lighthouse CI and a gzip bundle budget in CI.
+
+### 15. Realistic receiver and split call (prototype v2)
+
+The operator's voice became real, so the radio follows: prototype v2 (`docs/prototype/index.html`,
+inspired by the film _Frequency_). `libs/ui` gets the receiver (`Receiver`, meter windows,
+`MainDial`, `BandSpread`, `SMeter`, knobs, jewel lamp, `SoundSwitch`), a new `DeskMicrophone`
+that calls when pressed and hangs up when pressed again, and `SplitStage` with the `AuroraRift`.
+The tuner becomes the receiver's readout strip (`TopicForm`) and preset bay (`WeeklyKeys`); the
+call side becomes `StationHeader` and a paperless `ConversationLog`. Layout parity now measures the
+app against prototype v2 at home and on air.
+
+### 16. Valve power-up and power-down
+
+The receiver's light ramps like a valve set (`--power`, `--lamp`, `--tally` animated instead of
+set): it warms up from dark on load and when a call goes out, flickers once, and cools down
+exponentially on hang-up while the rift closes, before the QSL card prints. Operator lines type
+out, and the tune-in and hang-up sounds gain a mains hum.

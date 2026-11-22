@@ -16,7 +16,9 @@ describe('App', () => {
     render(<App />);
     expect(screen.getByRole('img', { name: 'Medidor de señal' })).toBeInTheDocument();
     expect(screen.getByText('BANDA MUNDIAL · 3–30')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Micrófono apagado' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Encender el micrófono y llamar' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'SONIDO · ON' })).toHaveAttribute(
       'aria-pressed',
       'true',

@@ -10,7 +10,9 @@ test('a demo QSO goes from the tuner to the QSL card and back', async ({ page })
   await page.clock.runFor(750);
   const status = page.getByRole('status');
   await expect(status).toHaveText('Sintonizando…');
-  await expect(page.getByText('MIC ON')).toBeVisible();
+  // The microphone is live (its caption hides on phones to leave room for the QSO)
+  const mic = page.getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' });
+  await expect(mic).toBeVisible();
 
   await page.clock.runFor(12_000);
   await expect(page.locator('time')).toHaveText('00:12');
@@ -21,9 +23,7 @@ test('a demo QSO goes from the tuner to the QSL card and back', async ({ page })
   expect(await axeViolations(page)).toEqual([]);
 
   // Hang up from the microphone: 1.2 s printing the card, then the QSL
-  await page
-    .getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' })
-    .click();
+  await mic.click();
   await expect(status).toHaveText('73 · cerrando…');
   await page.clock.runFor(1200);
   const card = page.getByRole('article', { name: 'Mundial 2026' });

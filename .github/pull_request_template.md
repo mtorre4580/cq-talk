@@ -62,7 +62,7 @@
 
 ### Accessibility & UX _(only if the UI changed)_
 
-- [ ] Matches the prototype (`docs/prototype/Main.dc.html`) at 1280 px and 390 px
+- [ ] Matches the prototype (`docs/prototype/index.html`) at 1280 px and 390 px
 - [ ] Fully usable with the keyboard, with visible focus; touch targets ≥ 44 px
 - [ ] Decorative motion stops with `prefers-reduced-motion`
 - [ ] No horizontal scroll at phone width

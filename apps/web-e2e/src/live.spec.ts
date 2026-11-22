@@ -35,7 +35,7 @@ test('a live QSO streams the operator, corrects the user and prints their QSL ca
   expect(await axeViolations(page)).toEqual([]);
   await transmission.fill('I think is great');
   await page.keyboard.press('Enter');
-  await expect(log).toContainText('VOS ▸ I think is great. Over.');
+  await expect(log.getByRole('listitem').nth(1)).toContainText('VOSI think is great. Over.');
   await expect(log).toContainText('✎ Mejor: I think it’s great.');
   await expect(log).toContainText('Why do you think so? Over.');
 

@@ -4,18 +4,17 @@ export interface OnAirLampProps {
   on: boolean;
 }
 
-/** Red "ON AIR" lamp that pulses while transmitting. The text label keeps it readable without color. */
+/**
+ * Red jewel pilot lamp. Its glow follows `--lamp` from the desk set; the engraved "ON AIR" and
+ * the ON/OFF state keep it readable without color.
+ */
 export const OnAirLamp = ({ on }: OnAirLampProps) => {
   const { t } = useI18n();
   return (
-    <div className="flex items-center gap-2 font-label text-[12px] tracking-[2px] text-night-label">
-      <span
-        aria-hidden="true"
-        data-on={on}
-        className={`size-3.5 rounded-full border-2 border-rig-body ${on ? 'bg-lamp-on animate-lamp' : 'bg-lamp-off'}`}
-        style={{ boxShadow: on ? '0 0 12px rgba(255,74,46,.9)' : 'none' }}
-      />
-      {t('rig.onAir')}
+    <div className="cq-ctl">
+      <span className="cq-eng">{t('rig.onAir')}</span>
+      <span aria-hidden="true" className="cq-jewel" data-on={on} />
+      <span className="cq-ctl-state">{on ? t('rig.on') : t('rig.off')}</span>
     </div>
   );
 };

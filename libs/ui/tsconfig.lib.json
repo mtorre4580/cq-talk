@@ -12,6 +12,9 @@
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "src/test/**"],
   "references": [
     {
+      "path": "../platform/tsconfig.lib.json"
+    },
+    {
       "path": "../i18n/tsconfig.lib.json"
     }
   ]

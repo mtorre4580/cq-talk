@@ -1,4 +1,4 @@
-/** Source of truth for every UI string. Copy matches docs/prototype/Main.dc.html. */
+/** Source of truth for every UI string. Copy matches docs/prototype (index.html and v1/). */
 export const es = {
   app: {
     name: 'CQ talk',
@@ -12,16 +12,22 @@ export const es = {
     meterUnits: 'S UNITS',
     mhz: 'MHz',
     worldBand: 'BANDA MUNDIAL · 3–30',
+    sound: 'SONIDO',
+    on: 'ON',
+    off: 'OFF',
+    megacycles: 'MEGACYCLES',
+    bandSpread: 'BAND SPREAD',
+    tone: 'TONE',
+    rfGain: 'R.F. GAIN',
+    signal: 'SIGNAL STRENGTH',
+    spreadScale: 'BAND SPREAD · KC',
   },
   mic: {
     on: 'MIC ON',
     off: 'MIC OFF',
     closing: 'MIC OFF · 73',
-    hintOn: 'Tocá el micrófono para apagarlo y terminar',
-    hintOff: 'Se enciende al llamar',
-    hintClosing: 'Imprimiendo tu tarjeta QSL…',
     labelOn: 'Apagar el micrófono y terminar la conversación',
-    labelOff: 'Micrófono apagado',
+    labelOff: 'Encender el micrófono y llamar',
   },
   tuner: {
     prompt: '¿De qué querés hablar?',
@@ -86,6 +92,7 @@ export const es = {
     you: 'VOS',
     better: '✎ Mejor: {text}',
     ok: '✓ Copiado 5 y 9: bien dicho',
+    hangUp: 'Tocá el micrófono para cortar · 73',
   },
   report: {
     title: 'TARJETA QSL · CONFIRMO NUESTRO QSO',
