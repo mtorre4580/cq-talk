@@ -52,6 +52,19 @@ describe('createSpeechInput', () => {
     expect(r).toMatchObject({ lang: 'en-US', continuous: true, interimResults: true, starts: 1 });
   });
 
+  it('ignores the results the browser still delivers after the turn ends', () => {
+    const { input, fake, onTransmission } = setup();
+    input.listen();
+    const r = fake.instances[0]!;
+    r.say(['I think it is great over', true]);
+    expect(onTransmission).toHaveBeenCalledOnce();
+
+    // stop() returns the last results: they must not become a second transmission
+    r.say(['I think it is great over', true]);
+    vi.advanceTimersByTime(5000);
+    expect(onTransmission).toHaveBeenCalledOnce();
+  });
+
   it('shows interim words and hands over the turn on "over"', () => {
     const { input, fake, onInterim, onTransmission } = setup();
     input.listen();

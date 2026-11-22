@@ -99,6 +99,9 @@ export const createSpeechInput = ({
     r.continuous = true;
     r.interimResults = true;
     r.onresult = (event) => {
+      // stop() still delivers the last results: the turn is over, so they must not start a
+      // second transmission (it once made the operator answer twice, in two overlapping voices)
+      if (!listening) return;
       let text = '';
       let final = true;
       for (let i = 0; i < event.results.length; i++) {

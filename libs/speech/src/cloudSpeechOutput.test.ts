@@ -59,6 +59,23 @@ describe('createCloudSpeechOutput', () => {
     expect(backup.said).toEqual(['Hello. Over.']);
   });
 
+  it('never plays two lines at once: a new line cuts the one playing', async () => {
+    const first = playback();
+    const second = playback();
+    const voices = [first, second];
+    const output = createCloudSpeechOutput({
+      synthesize: async () => new ArrayBuffer(4),
+      play: async () => voices.shift() ?? null,
+      fallback: fallback(),
+    });
+    void output.speak('Roger that. Over.');
+    await new Promise((r) => setTimeout(r, 0));
+    void output.speak('Why do you think so? Over.');
+    await new Promise((r) => setTimeout(r, 0));
+    expect(first.stop).toHaveBeenCalled();
+    expect(second.stop).not.toHaveBeenCalled();
+  });
+
   it('stops the voice when cut off, without falling back', async () => {
     const backup = fallback();
     const voice = playback();

@@ -28,6 +28,9 @@ export const createCloudSpeechOutput = ({
     supported: true,
     async speak(text) {
       if (!text.trim()) return;
+      // One voice at a time, like the browser's speech queue: a new line cuts the previous one
+      controller?.abort();
+      playing?.stop();
       const current = new AbortController();
       controller = current;
       try {
