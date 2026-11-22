@@ -29,12 +29,13 @@ describe('QSO flow', () => {
     // The click unlocks audio; the tune-in waits for the needle
     expect(audio.started).toEqual([]);
     act(() => vi.advanceTimersByTime(PRESET_CALL_DELAY_MS));
-    expect(audio.started).toEqual(['noise', 'oscillator', 'oscillator', 'oscillator']);
+    // Static, the heterodyne pair, the lock beep and the three mains hum oscillators
+    expect(audio.started).toEqual(['noise', ...Array<string>(6).fill('oscillator')]);
 
     await user.click(
       screen.getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' }),
     );
-    expect(audio.started.slice(4)).toEqual(['noise', 'oscillator']);
+    expect(audio.started.slice(7)).toEqual(['noise', 'oscillator', 'oscillator']);
   });
 
   it('stays silent with SONIDO · OFF', async () => {

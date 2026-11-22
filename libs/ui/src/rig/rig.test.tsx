@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '../test/renderWithI18n';
 import { DeskMicrophone } from './DeskMicrophone';
@@ -67,16 +67,49 @@ describe('SMeter', () => {
 });
 
 describe('Rig', () => {
-  it('sets the valve levels the dials, lamp and tally read', () => {
-    const { container, rerender } = renderWithI18n(
-      <Rig power="off" radio={<span />} microphone={<span />} />,
-    );
+  const level = (element: HTMLElement, name: string) => element.style.getPropertyValue(name);
+  const rig = (power: 'off' | 'on' | 'closing') => (
+    <Rig power={power} radio={<span />} microphone={<span />} />
+  );
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it('warms up to standby, to full power on air and cools down to dark', () => {
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance'] });
+    const { container, rerender } = renderWithI18n(rig('off'));
     const deskset = container.firstElementChild as HTMLElement;
-    expect(deskset.style.getPropertyValue('--power')).toBe('0.45');
-    expect(deskset.style.getPropertyValue('--lamp')).toBe('0');
-    rerender(<Rig power="on" radio={<span />} microphone={<span />} />);
-    expect(deskset.style.getPropertyValue('--power')).toBe('1');
-    expect(deskset.style.getPropertyValue('--tally')).toBe('1');
+
+    act(() => vi.advanceTimersByTime(3000));
+    expect(level(deskset, '--power')).toBe('0.450');
+    expect(level(deskset, '--lamp')).toBe('0.000');
+
+    rerender(rig('on'));
+    act(() => vi.advanceTimersByTime(700));
+    expect(Number(level(deskset, '--power'))).toBeLessThan(1);
+    act(() => vi.advanceTimersByTime(2000));
+    expect(level(deskset, '--power')).toBe('1.000');
+    expect(level(deskset, '--lamp')).toBe('1.000');
+    expect(level(deskset, '--tally')).toBe('1.000');
+
+    rerender(rig('closing'));
+    act(() => vi.advanceTimersByTime(2500));
+    expect(level(deskset, '--power')).toBe('0.000');
+    expect(level(deskset, '--tally')).toBe('0.000');
+  });
+
+  it('jumps straight to the level with reduced motion', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('reduce'),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    const { container } = renderWithI18n(rig('on'));
+    const deskset = container.firstElementChild as HTMLElement;
+    expect(level(deskset, '--power')).toBe('1.000');
+    expect(level(deskset, '--lamp')).toBe('1.000');
   });
 });
 

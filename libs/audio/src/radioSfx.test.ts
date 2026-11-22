@@ -13,16 +13,16 @@ describe('createRadioSfx', () => {
     expect(fake.calls.resume).toBeGreaterThan(0);
   });
 
-  it('tune-in plays static, the heterodyne pair and the lock beep', () => {
+  it('tune-in plays static, the heterodyne pair, the lock beep and the mains hum', () => {
     const fake = createFakeAudioContext();
     createRadioSfx(() => fake.ctx).tuneIn();
-    expect(fake.started).toEqual(['noise', 'oscillator', 'oscillator', 'oscillator']);
+    expect(fake.started).toEqual(['noise', ...Array<string>(6).fill('oscillator')]);
   });
 
-  it('off plays a static burst and a click', () => {
+  it('off plays a static burst, a click and the sinking hum', () => {
     const fake = createFakeAudioContext();
     createRadioSfx(() => fake.ctx).off();
-    expect(fake.started).toEqual(['noise', 'oscillator']);
+    expect(fake.started).toEqual(['noise', 'oscillator', 'oscillator']);
   });
 
   it('loops soft static under a transmission until stopped', () => {

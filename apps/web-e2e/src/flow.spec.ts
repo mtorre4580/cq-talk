@@ -22,10 +22,10 @@ test('a demo QSO goes from the tuner to the QSL card and back', async ({ page })
   await expect(log).toContainText('✎ Mejor: What matters most to me');
   expect(await axeViolations(page)).toEqual([]);
 
-  // Hang up from the microphone: 1.2 s printing the card, then the QSL
+  // Hang up from the microphone: 2.3 s while the set cools down and the rift closes, then the QSL
   await mic.click();
   await expect(status).toHaveText('73 · cerrando…');
-  await page.clock.runFor(1200);
+  await page.clock.runFor(2300);
   const card = page.getByRole('article', { name: 'Mundial 2026' });
   await expect(card).toBeVisible();
   await expect(card).toContainText('2 de 2');

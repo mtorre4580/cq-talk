@@ -19,6 +19,7 @@ import {
   createElevenLabsClient,
   createSpeechOutput,
 } from '@cq-talk/speech';
+import { usePrefersReducedMotion } from '@cq-talk/platform';
 import { useSettings } from '@cq-talk/storage';
 import { TopicForm, WeeklyKeys } from '@cq-talk/tuner';
 import { DeskMicrophone, Receiver, Rig, SplitStage } from '@cq-talk/ui';
@@ -78,6 +79,7 @@ export const RadioPage = () => {
   const { t, locale } = useI18n();
   const settings = useSettings(DEFAULT_MODEL);
   const sound = useRadioSfx();
+  const reducedMotion = usePrefersReducedMotion();
   const qso = useQso(
     { unlock: sound.unlock, tuneIn: sound.tuneIn, off: sound.off },
     settings.apiKey ? 'live' : 'demo',
@@ -182,7 +184,11 @@ export const RadioPage = () => {
                 status={callStatus(state)}
               />
               <div aria-hidden="true" className="cq-rule" />
-              <ConversationLog entries={log} call={state.station.call} />
+              <ConversationLog
+                entries={log}
+                call={state.station.call}
+                typewriter={!reducedMotion}
+              />
               {state.mode === 'live' && !state.closing && (
                 <TransmitPanel
                   yourTurn={live.yourTurn}

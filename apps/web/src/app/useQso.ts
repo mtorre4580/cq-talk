@@ -4,8 +4,11 @@ import type { Preset, QsoMode } from '@cq-talk/qso';
 
 /** Pause between pressing a weekly key and the call, so the needle travels first */
 export const PRESET_CALL_DELAY_MS = 750;
-/** Pause between switching the microphone off and the QSL card */
-export const CLOSING_DELAY_MS = 1200;
+/**
+ * Pause between switching the microphone off and the QSL card: the valves cool down
+ * (`COOL_DOWN_MS` in `@cq-talk/ui`) and the aurora rift closes to a thread first
+ */
+export const CLOSING_DELAY_MS = 2300;
 
 /** Side effects the radio makes around the QSO (sound effects today, speech later). */
 export interface QsoEffects {

@@ -128,7 +128,7 @@ Every project is a workspace package named `@cq-talk/<name>` with its Nx tags in
   (its own `eslint.config.mjs` forbids React, `window`, `document`, `localStorage` and `fetch`).
   Everything with side effects (audio, speech, storage, the API) lives in util or data-access
   libraries and is injected. Timers around the QSO (the 750 ms preset delay, the 1 s clock, the
-  1.2 s closing pause) live in `apps/web/src/app/useQso.ts`.
+  2.3 s closing pause while the set cools down) live in `apps/web/src/app/useQso.ts`.
 - Domain data that needs words (preset topics, station cities) keeps only ids in `libs/qso`;
   the text lives in the dictionaries (`presets.<id>`, `stations.<id>`).
 - A new library: create the folder with `package.json` (name, tags, `exports`), `tsconfig.json`
@@ -153,7 +153,12 @@ on the night on the right (no paper). Dark only.
 so it scales as one object; textures are inline SVG data URIs (`feTurbulence` +
 `feDiffuseLighting`, allowed by `img-src data:`). The receiver's light follows three custom
 properties on the desk set (`Rig`): `--power` (dials: 0.45 standby, 1 on air, 0 closing),
-`--lamp` (ON AIR jewel) and `--tally` (the microphone's tally). Dial scales are computed from
+`--lamp` (ON AIR jewel) and `--tally` (the microphone's tally). `useValvePower`
+(`libs/ui/src/rig/valve.ts`) ramps them like a valve set, writing the custom properties on each
+animation frame without re-rendering: first light from dark on load (2.2 s), a cubic warm-up with
+a flicker and a stuttering jewel when a call goes out (1.5 s), an exponential cool-down on
+hang-up (2 s). With reduced motion they jump. The operator's new lines type out (`TypedText`,
+the whole line stays available to screen readers). Dial scales are computed from
 pure geometry in `libs/ui/src/rig/dial.ts`; the rift's light strands from `rift.ts` (a sine
 wave travelling up the rift, morphed by SMIL, still with reduced motion).
 
@@ -205,7 +210,8 @@ stars, S meter, flickers) stops with `prefers-reduced-motion`.
 
 **Sound** (`libs/audio`, Web Audio, no files): tune-in = band-passed static sweeping
 700 → 2400 → 1300 Hz over 3.6 s, a heterodyne whistle gliding 2600 → 420 Hz and a 1 kHz lock
-beep at 3 s; hang-up = a high-passed static burst and a 110 Hz click. On by default, toggled by
+beep at 3 s, under a 60 Hz mains hum (and harmonics) that swells as the valves warm up;
+hang-up = a high-passed static burst, a 110 Hz click and the hum sinking 120 → 40 Hz. On by default, toggled by
 "SONIDO · ON/OFF" and stored in `cq-talk:sound`. Sounds only play in response to a user action
 and are no-ops where Web Audio does not exist.
 
