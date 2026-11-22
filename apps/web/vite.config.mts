@@ -95,6 +95,8 @@ export default defineConfig(({ command, isPreview }) => ({
           '**/logo.svg',
           // Only link previews (social networks, chat apps) fetch it
           '**/og-image.png',
+          // Google Search Console ownership check, never needed by the app
+          '**/google*.html',
         ],
         runtimeCaching: [
           {
