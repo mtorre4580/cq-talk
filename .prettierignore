@@ -8,3 +8,5 @@ pnpm-lock.yaml
 # Reference copy of the design prototype: keep it byte-for-byte as exported
 docs/prototype
 .lighthouseci
+# Google Search Console checks this file byte for byte
+apps/web/public/google*.html

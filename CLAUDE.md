@@ -306,7 +306,8 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 `apps/web/index.html` carries the description, keywords, canonical URL, Open Graph and Twitter
 cards (`og-image.png`, 1200×630) and a `WebApplication` JSON-LD block (a data block, so the CSP's
 `script-src 'self'` does not apply to it). `public/robots.txt` and `public/sitemap.xml` point
-crawlers at the Pages URL. The social preview is kept out of the PWA precache. All README media
+crawlers at the Pages URL; `public/google5b01916f789e7596.html` verifies the site in Google
+Search Console. The social preview and the verification file are kept out of the PWA precache. All README media
 and `og-image.png` are captured from the production build in demo mode by `pnpm media`: rerun it
 after any visible change. GitHub's repository social preview is uploaded by hand (Settings →
 Social preview) from `apps/web/public/og-image.png`.
