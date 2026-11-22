@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRadioSfx } from '@cq-talk/audio';
 import { ConversationLog, StationPanel, TransmitPanel } from '@cq-talk/call';
 import { DEFAULT_MODEL } from '@cq-talk/claude';
@@ -14,6 +14,11 @@ import {
 } from '@cq-talk/qso';
 import type { QslReport, QsoState } from '@cq-talk/qso';
 import { ReportScreen, useDemoReport } from '@cq-talk/report';
+import {
+  createCloudSpeechOutput,
+  createElevenLabsClient,
+  createSpeechOutput,
+} from '@cq-talk/speech';
 import { useSettings } from '@cq-talk/storage';
 import { TunerPanel } from '@cq-talk/tuner';
 import {
@@ -90,7 +95,19 @@ export const RadioPage = () => {
   const log = conversationLog(state);
   const lastOperator = log.findLast((entry) => entry.who === 'operator');
   const [voiceDoneId, setVoiceDoneId] = useState<string | null>(null);
+  // ElevenLabs through the radio when configured; the browser voice otherwise and as a backup
+  const { voiceProvider, elevenLabsKey, elevenLabsVoiceId } = settings;
+  const operatorVoice = useMemo(() => {
+    if (voiceProvider !== 'elevenlabs' || !elevenLabsKey || !elevenLabsVoiceId) return undefined;
+    const client = createElevenLabsClient(elevenLabsKey);
+    return createCloudSpeechOutput({
+      synthesize: (text, signal) => client.synthesize(text, elevenLabsVoiceId, signal),
+      play: sound.voice,
+      fallback: createSpeechOutput(),
+    });
+  }, [voiceProvider, elevenLabsKey, elevenLabsVoiceId, sound.voice]);
   useOperatorVoice(log, {
+    output: operatorVoice,
     enabled: sound.soundOn && onAir,
     hiss: sound.hiss,
     streamingId: state.operatorTalking ? (lastOperator?.id ?? null) : null,

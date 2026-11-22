@@ -15,10 +15,16 @@
       "path": "../../storage/tsconfig.lib.json"
     },
     {
+      "path": "../../speech/tsconfig.lib.json"
+    },
+    {
       "path": "../../i18n/tsconfig.lib.json"
     },
     {
       "path": "../../claude/tsconfig.lib.json"
+    },
+    {
+      "path": "../../audio/tsconfig.lib.json"
     }
   ]
 }

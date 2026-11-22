@@ -39,7 +39,7 @@ it: colors, sizes, fonts, copy, animations and sounds.
 | Routing | React Router 8 (library mode, `BrowserRouter`) | `/` radio, `/qsl` Mis QSL, `/qsl/:id` a saved card; basename from Vite's `BASE_URL` |
 | i18n | Custom: Context + typed dictionaries in `libs/i18n` | `es` (default, source of truth), `en`, `pt-BR`; no dependencies |
 | AI | `@anthropic-ai/sdk` in the browser + `zod` | `claude-opus-5-5` by default, configurable. Structured outputs for corrections and the report |
-| Speech | Web Speech API (`SpeechRecognition`, `speechSynthesis`) | Behind interfaces in `libs/speech`, with a typed fallback |
+| Speech | Web Speech API (`SpeechRecognition`, `speechSynthesis`) + optional ElevenLabs voice | Behind interfaces in `libs/speech`, with a typed fallback. ElevenLabs (`eleven_flash_v2_5`, the user's own key) plays through a radio filter in `libs/audio` and falls back to the browser voice |
 | Sound effects | Web Audio, synthesized | No audio files. `libs/audio` |
 | Storage | `localStorage` (settings, key) and IndexedDB via `idb-keyval` (QSL log, `createLogbook`, database `cq-talk` / store `qsl-log`) | Always through `storage` from `@cq-talk/platform` (never throws); keys prefixed `cq-talk:` |
 | PWA | `vite-plugin-pwa` (Workbox) | Manifest and service worker in `apps/web/vite.config.mts`; `registerSW.js` as a file (an inline script would break the CSP). The app shell is precached (~545 KB); the SDK and PDF chunks are cached on first use. Icons are generated from `apps/web/public/logo.svg` with `pnpm exec pwa-assets-generator --config pwa-assets.config.ts` (run in `apps/web`) |
@@ -234,8 +234,18 @@ interface ConversationEngine {
   ends when they say "over" or after about 1.5 s of silence (`createSpeechInput` in
   `libs/speech`; `normalizeTransmission` makes every line end in "Over."). Browsers stop
   continuous recognition on their own, so it restarts while the turn is open.
-- The operator's lines are read aloud by `useOperatorVoice` (speech synthesis, an English voice)
-  over a soft static bed (`hiss` in `libs/audio`), in demo and live mode, following SONIDO.
+- The operator's lines are read aloud by `useOperatorVoice` over a soft static bed (`hiss` in
+  `libs/audio`), in demo and live mode, following SONIDO. Lines are read once complete (live
+  transmissions stream in; reading the first chunk once left only "Copy that" spoken), and the
+  microphone stays closed until the voice ends.
+- **Operator voice** (settings → "Voz del operador"): the browser's speech synthesis by default
+  (`pickVoice` ranks natural voices and never picks macOS novelty voices like "Albert"), or
+  **ElevenLabs** with the user's own key: `createElevenLabsClient` (`libs/speech`) synthesizes
+  mp3 with `eleven_flash_v2_5`, `createCloudSpeechOutput` plays it through `voice()` in
+  `libs/audio` (300–3200 Hz band, presence lift, soft clipping, compression, roger beep) and falls
+  back to the browser voice on any failure. `rankOperatorVoices` suggests a mature, warm American
+  male voice from the premade list. OpenAI's speech endpoint was ruled out: its TTS models shut
+  down on 2027-01-06. The settings say the voice is AI-generated.
 - Typing is always possible (`TransmitPanel`): it is the fallback where recognition is missing
   (Firefox, some installed iOS apps) or the microphone is blocked.
 
@@ -249,12 +259,14 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 
 ## Privacy and security
 
-- The API key lives in `localStorage` under `cq-talk:api-key`, is never logged, never put in a
-  URL and only sent to `api.anthropic.com`.
+- The API keys live in `localStorage` (`cq-talk:api-key`, `cq-talk:elevenlabs-key`), are never
+  logged, never put in a URL, and are only sent to `api.anthropic.com` and `api.elevenlabs.io`.
+  ElevenLabs advises against client-side keys, so the settings ask users to restrict theirs to
+  text to speech and reading voices, with a credit quota.
 - The production build ships a strict Content Security Policy (`CONTENT_SECURITY_POLICY` in
   `apps/web/vite.config.mts`, injected as a `<meta>` on build only, since Vite's dev server needs
   inline styles): `script-src 'self'`, `style-src 'self'`,
-  `connect-src 'self' https://api.anthropic.com`. React's `style` props are allowed (they go
+  `connect-src 'self' https://api.anthropic.com https://api.elevenlabs.io`. React's `style` props are allowed (they go
   through the CSSOM). `csp.spec.ts` walks every screen with the policy on.
 - The Anthropic SDK stays out of the main bundle: import it only through
   `await import('@cq-talk/claude/client')`. `checkDynamicDependenciesExceptions` in
@@ -292,7 +304,9 @@ color alone (the lamp and LED always have a text label next to them). No horizon
   `AudioContext` (`installFakeAudioContext()`) that records which nodes started.
 - Engines: the Claude engine is unit-tested with a fake `client.beta.messages`. In the browser,
   `live.spec.ts` runs a whole live QSO against `fakeAnthropic()` (Playwright routes that answer
-  with real SSE streams and structured JSON) with the CSP on. No network or tokens in tests, ever.
+  with real SSE streams and structured JSON) with the CSP on; `voice.spec.ts` routes ElevenLabs to
+  a generated WAV and checks the cloud voice plays with no browser-voice fallback. No network or
+  tokens in tests, ever.
 - Browser tests (`apps/web-e2e`) run in demo mode, at desktop and phone size, with Playwright's
   fake clock (`page.clock`) so the QSO timing is deterministic: axe has no violations on any
   screen, the flow works end to end and the page never scrolls horizontally. `openApp()` in

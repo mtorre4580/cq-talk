@@ -14,7 +14,7 @@ test('the production build ships a strict Content Security Policy and never trip
   const csp = await page
     .locator('meta[http-equiv="Content-Security-Policy"]')
     .getAttribute('content');
-  expect(csp).toContain("connect-src 'self' https://api.anthropic.com");
+  expect(csp).toContain("connect-src 'self' https://api.anthropic.com https://api.elevenlabs.io");
   expect(csp).toContain("script-src 'self'");
   expect(csp).toContain("style-src 'self'");
 

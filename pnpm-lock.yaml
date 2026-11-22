@@ -424,12 +424,18 @@ importers:
 
   libs/features/settings:
     dependencies:
+      '@cq-talk/audio':
+        specifier: workspace:*
+        version: link:../../audio
       '@cq-talk/claude':
         specifier: workspace:*
         version: link:../../claude
       '@cq-talk/i18n':
         specifier: workspace:*
         version: link:../../i18n
+      '@cq-talk/speech':
+        specifier: workspace:*
+        version: link:../../speech
       '@cq-talk/storage':
         specifier: workspace:*
         version: link:../../storage

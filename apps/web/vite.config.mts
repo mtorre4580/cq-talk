@@ -9,8 +9,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 const PAGES_BASE = '/cq-talk/';
 
 /**
- * Content Security Policy for the production build. The user's API key lives in localStorage, so
- * the page may only load its own code and only talk to its origin and api.anthropic.com.
+ * Content Security Policy for the production build. The user's API keys live in localStorage, so
+ * the page may only load its own code and only talk to its origin, api.anthropic.com and
+ * api.elevenlabs.io.
  * Development skips it: Vite's dev server injects inline styles and opens a websocket.
  */
 export const CONTENT_SECURITY_POLICY = [
@@ -19,7 +20,8 @@ export const CONTENT_SECURITY_POLICY = [
   "style-src 'self'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
-  "connect-src 'self' https://api.anthropic.com",
+  // The user's own keys only reach these two services
+  "connect-src 'self' https://api.anthropic.com https://api.elevenlabs.io",
   "media-src 'self' blob:",
   "worker-src 'self'",
   "manifest-src 'self'",

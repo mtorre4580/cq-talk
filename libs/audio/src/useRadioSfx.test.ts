@@ -7,6 +7,7 @@ const fakeSfx = (): RadioSfx => ({
   tuneIn: vi.fn(),
   off: vi.fn(),
   hiss: vi.fn(() => () => {}),
+  voice: vi.fn(async () => null),
   dispose: vi.fn(),
 });
 

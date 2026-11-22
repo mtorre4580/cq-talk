@@ -6,6 +6,7 @@ import { useI18n } from '@cq-talk/i18n';
 import type { TranslationKey } from '@cq-talk/i18n';
 import { saveApiKey, saveModel, useSettings } from '@cq-talk/storage';
 import { maskKey } from './maskKey';
+import { VoiceSection } from './VoiceSection';
 
 export interface SettingsDialogProps {
   open: boolean;
@@ -193,6 +194,9 @@ export const SettingsDialog = ({
           </button>
         </div>
       </form>
+      <div className="mt-[18px]">
+        <VoiceSection settings={settings} />
+      </div>
     </dialog>
   );
 };
