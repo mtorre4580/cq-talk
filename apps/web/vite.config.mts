@@ -93,6 +93,8 @@ export default defineConfig(({ command, isPreview }) => ({
           '**/purify.es*',
           '**/index.es-*',
           '**/logo.svg',
+          // Only link previews (social networks, chat apps) fetch it
+          '**/og-image.png',
         ],
         runtimeCaching: [
           {
