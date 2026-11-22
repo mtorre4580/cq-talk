@@ -23,7 +23,7 @@ its own and leaves `main` deployable.
 | 16 | `feat/valve-power` | feat: warm the receiver up and down like a valve set | Power-up and power-down animations, typed operator lines, hum |
 
 After PR 12: media (README screenshots, Open Graph image, demo GIF and video recorded with
-Playwright in demo mode).
+Playwright in demo mode), delivered in PR 18 (`docs/readme-media`) after the v2 redesign.
 
 ## Phase details
 

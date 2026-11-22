@@ -27,7 +27,8 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "check:bundle": "tsx tools/bundle/check-bundle.ts",
-    "lhci": "lhci autorun"
+    "lhci": "lhci autorun",
+    "media": "tsx tools/media/capture-media.ts"
   },
   "dependencies": {
     "react": "19.3.1",
