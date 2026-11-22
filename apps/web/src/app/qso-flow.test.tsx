@@ -65,7 +65,7 @@ describe('QSO flow', () => {
     expect(screen.getByText('EN CONTACTO CON')).toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(3000));
-    expect(screen.getByText('00:03')).toBeInTheDocument();
+    expect(screen.getByText('00:03', { selector: 'time' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Recibiendo · tu turno');
     expect(
       screen.getByText(/So, Mundial 2026 — what’s your take on it\? Over\./),
@@ -94,6 +94,18 @@ describe('QSO flow', () => {
     expect(screen.queryByRole('img', { name: 'Medidor de señal' })).not.toBeInTheDocument();
   });
 
+  it('calls from the microphone on the typed topic, or asks for one first', async () => {
+    const user = setup();
+    const mic = screen.getByRole('button', { name: 'Encender el micrófono y llamar' });
+    await user.click(mic);
+    expect(screen.getByLabelText('¿De qué querés hablar?')).toHaveFocus();
+
+    await user.type(screen.getByLabelText('¿De qué querés hablar?'), 'Mundial 2026');
+    await user.click(mic);
+    expect(screen.getByText('MIC ON')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Sintonizando…');
+  });
+
   it('does not call without a topic', async () => {
     const user = setup();
     await user.click(screen.getByRole('button', { name: 'LLAMAR · CQ' }));
@@ -115,7 +127,8 @@ describe('QSO flow', () => {
     await user.click(
       screen.getByRole('button', { name: 'Apagar el micrófono y terminar la conversación' }),
     );
-    expect(screen.getByText('Imprimiendo tu tarjeta QSL…')).toBeInTheDocument();
+    expect(screen.getByText('MIC OFF · 73')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('73 · cerrando…');
 
     act(() => vi.advanceTimersByTime(CLOSING_DELAY_MS));
     expect(screen.getByRole('article', { name: 'space' })).toBeInTheDocument();

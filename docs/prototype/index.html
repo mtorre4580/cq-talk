@@ -1,0 +1,2990 @@
+<meta charset="utf-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, viewport-fit=cover"
+/>
+<title>CQ talk v2</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;500;600&family=Share+Tech+Mono&family=Special+Elite&display=swap"
+/>
+<style>
+  /* Layout: a night desk under the aurora. Home = the receiver centered; call = the screen splits
+   on a vertical aurora rift, receiver + desk mic on the left, the QSO as plain light on the right. */
+  :root {
+    color-scheme: dark;
+    --night: #05080d;
+    --ink: #e8e4d8;
+    --ink-dim: #9fa9a4;
+    --amber: #ffb347;
+    --amber-soft: #e9b25f;
+    --op: #ffcf94;
+    --ok: #86d9a6;
+    --red: #b0130a;
+    --steel: #5d625f;
+    --crackle: #151413;
+    --ivory: #efe5cf;
+    --paper: #f3ead3;
+    --paper-ink: #2a211b;
+    --f-label: "Oswald", "Arial Narrow", sans-serif;
+    --f-mono: "Share Tech Mono", ui-monospace, monospace;
+    --f-type: "Courier Prime", "Courier New", monospace;
+    --f-elite: "Special Elite", "Courier New", monospace;
+    --ease-split: cubic-bezier(0.7, 0, 0.2, 1);
+    --ease-needle: cubic-bezier(0.4, 1.3, 0.6, 1);
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font-family: var(--f-type);
+    overflow-x: hidden;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  /* ---------- sky ---------- */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 70% at 50% 110%, #0b1a1c 0%, transparent 60%),
+      linear-gradient(#03060b, #071019 60%, #0a1416);
+  }
+  #stars {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .aurora {
+    position: absolute;
+    inset: -20% -10% 30%;
+    filter: blur(40px);
+    opacity: 0.35;
+    transition: opacity 2.4s ease;
+    background:
+      radial-gradient(
+        40% 30% at 30% 40%,
+        rgba(70, 255, 170, 0.55),
+        transparent 70%
+      ),
+      radial-gradient(
+        35% 25% at 65% 30%,
+        rgba(150, 90, 255, 0.4),
+        transparent 70%
+      ),
+      radial-gradient(
+        45% 20% at 50% 55%,
+        rgba(60, 220, 230, 0.35),
+        transparent 70%
+      );
+    animation: drift 26s ease-in-out infinite alternate;
+  }
+  body.onair .aurora {
+    opacity: 0.7;
+  }
+  @keyframes drift {
+    to {
+      transform: translate3d(4%, 3%, 0) scale(1.08) skewX(-4deg);
+    }
+  }
+  .desk {
+    position: fixed;
+    inset: auto 0 0;
+    height: 34vh;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        60% 120% at 22% 0%,
+        rgba(255, 170, 80, 0.16),
+        transparent 60%
+      ),
+      repeating-linear-gradient(
+        91deg,
+        rgba(255, 255, 255, 0.018) 0 2px,
+        transparent 2px 7px
+      ),
+      linear-gradient(#24170f, #120b07 70%, #090605);
+    box-shadow:
+      0 -1px 0 rgba(255, 200, 140, 0.18),
+      0 -30px 60px rgba(0, 0, 0, 0.6);
+  }
+  .lamp {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+      55% 60% at 18% 8%,
+      rgba(255, 176, 90, 0.1),
+      transparent 70%
+    );
+  }
+
+  /* ---------- stage + rift ---------- */
+  .stage {
+    position: relative;
+    z-index: 2;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .split {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .pane-left {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding-block: 28px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: 16px;
+    transition: flex-basis 1s var(--ease-split);
+  }
+  .pane-right {
+    flex: 0 0 0%;
+    min-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    display: flex;
+    transition:
+      flex-basis 1s var(--ease-split),
+      opacity 0.6s ease 0.5s;
+    background: linear-gradient(
+      90deg,
+      rgba(5, 8, 13, 0),
+      rgba(5, 8, 13, 0.5) 30%,
+      rgba(5, 8, 13, 0.62)
+    );
+  }
+  body.split-open .pane-left {
+    flex-basis: 54%;
+  }
+  body.split-open .pane-right {
+    flex-basis: 46%;
+    opacity: 1;
+  }
+
+  /* desktop: the rift is born at the center of the screen and rides the split to 54% */
+  .split {
+    position: relative;
+  }
+  .rift {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: left 1s var(--ease-split);
+  }
+  body.split-open .rift {
+    left: 54%;
+  }
+  .rift > * {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-50%);
+  }
+  .rift .flare {
+    width: 260px;
+    clip-path: polygon(0 0, 100% 0, 58% 100%, 42% 100%);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    /* #rift-wave ripples the glow like an aurora curtain */
+    filter: url(#rift-wave) blur(14px);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(60, 140, 255, 0.35) 30%,
+      rgba(70, 255, 170, 0.55) 44%,
+      #fff 50%,
+      rgba(150, 90, 255, 0.5) 57%,
+      rgba(60, 220, 230, 0.35) 70%,
+      transparent
+    );
+  }
+  .rift .streaks {
+    width: 120px;
+    mix-blend-mode: screen;
+    opacity: 0.8;
+    filter: url(#rift-wave) blur(0.6px);
+    -webkit-mask: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+    mask: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 7px,
+        rgba(120, 255, 210, 0.35) 7px 8px,
+        transparent 8px 13px,
+        rgba(120, 170, 255, 0.3) 13px 14px,
+        transparent 14px 23px
+      ),
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(110, 255, 200, 0.4) 40%,
+        rgba(255, 255, 255, 0.7) 50%,
+        rgba(150, 110, 255, 0.4) 60%,
+        transparent
+      );
+    animation: shimmer 3.2s linear infinite;
+  }
+  /* the core is a bundle of light strands that undulate (paths drawn in JS) */
+  .rift .core {
+    width: 160px;
+  }
+  .rift .core svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 0 3px #fff)
+      drop-shadow(0 0 12px rgba(80, 230, 220, 0.85))
+      drop-shadow(0 0 36px rgba(110, 90, 255, 0.55));
+    -webkit-mask: linear-gradient(transparent, #000 7%, #000 93%, transparent);
+    mask: linear-gradient(transparent, #000 7%, #000 93%, transparent);
+  }
+  @keyframes shimmer {
+    0% {
+      background-position:
+        0 0,
+        0 0;
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      background-position:
+        46px 0,
+        0 0;
+      opacity: 0.7;
+    }
+  }
+  /* open: a flash of light from the center, then it stays alive between the halves */
+  body.rift-on .rift {
+    opacity: 1;
+  }
+  body.rift-on .rift .core {
+    animation: rift-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  body.rift-on .rift .flare,
+  body.rift-on .rift .streaks {
+    animation:
+      rift-flare 1.1s ease-out both,
+      shimmer 3.2s linear 0.9s infinite;
+  }
+  @keyframes rift-in {
+    from {
+      transform: translateX(-50%) scaleY(0);
+      filter: brightness(3);
+    }
+    60% {
+      filter: brightness(2.2);
+    }
+    to {
+      transform: translateX(-50%) scaleY(1);
+      filter: brightness(1);
+    }
+  }
+  @keyframes rift-flare {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) scaleX(0.1);
+    }
+    35% {
+      opacity: 1;
+      transform: translateX(-50%) scaleX(1.6);
+    }
+    100% {
+      opacity: 0.8;
+      transform: translateX(-50%) scaleX(1);
+    }
+  }
+  /* close: narrows to a thread, leaves an afterglow, fades */
+  body.rift-closing .rift {
+    opacity: 1;
+  }
+  body.rift-closing .rift .flare,
+  body.rift-closing .rift .streaks {
+    animation: rift-out-wide 1s ease-in both;
+  }
+  body.rift-closing .rift .core {
+    animation: rift-out-core 1.8s cubic-bezier(0.5, 0, 0.3, 1) both;
+  }
+  @keyframes rift-out-wide {
+    to {
+      opacity: 0;
+      transform: translateX(-50%) scaleX(0);
+    }
+  }
+  @keyframes rift-out-core {
+    0% {
+      transform: translateX(-50%) scaleY(1);
+    }
+    55% {
+      transform: translateX(-50%) scaleY(0.04);
+      opacity: 1;
+      filter: brightness(2);
+    }
+    100% {
+      transform: translateX(-50%) scaleY(0);
+      opacity: 0;
+    }
+  }
+
+  /* ---------- desk set: receiver + microphone ---------- */
+  .deskset {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(10px, 2.4vw, 28px);
+    transition: max-width 1s var(--ease-split);
+  }
+  body.split-open .deskset {
+    max-width: 600px;
+  }
+  .rig {
+    flex: 1;
+    min-width: 0;
+    container-type: inline-size;
+    --power: 0;
+    --lamp: 0;
+  }
+
+  /* cabinet: grey hammertone steel with chrome side trims */
+  .cabinet {
+    position: relative;
+    padding: 2.6cqw 4.6cqw 2.2cqw;
+    border-radius: 1.6cqw 1.6cqw 1cqw 1cqw;
+    background-color: #5a605c;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.16),
+        transparent 18%,
+        transparent 80%,
+        rgba(0, 0, 0, 0.35)
+      ),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.045' numOctaves='3' seed='3'/%3E%3CfeDiffuseLighting lighting-color='%23b8bdb9' surfaceScale='3'%3E%3CfeDistantLight azimuth='235' elevation='55'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23h)'/%3E%3C/svg%3E");
+    background-blend-mode: normal, multiply;
+    box-shadow:
+      0 2.4cqw 4cqw rgba(0, 0, 0, 0.75),
+      0 0.6cqw 0 #2b2f2d,
+      inset 0 0.25cqw 0 rgba(255, 255, 255, 0.25),
+      inset 0 -0.3cqw 0.6cqw rgba(0, 0, 0, 0.5);
+  }
+  .cabinet::before,
+  .cabinet::after {
+    content: "";
+    position: absolute;
+    top: 30%;
+    height: 30%;
+    width: 2.6cqw;
+    border-radius: 0.6cqw;
+    background: repeating-linear-gradient(
+      180deg,
+      #f3f6f7 0,
+      #8d9398 0.5cqw,
+      #3b4044 0.9cqw,
+      #d9dde0 1.25cqw,
+      #f3f6f7 1.5cqw
+    );
+    box-shadow: 0 0.3cqw 0.6cqw rgba(0, 0, 0, 0.6);
+  }
+  .cabinet::before {
+    left: -0.9cqw;
+  }
+  .cabinet::after {
+    right: -0.9cqw;
+  }
+  .lid {
+    height: 3.2cqw;
+    margin: -1cqw -1.5cqw 2cqw;
+    border-radius: 1cqw 1cqw 0.3cqw 0.3cqw;
+    background: linear-gradient(#7b827e, #4e5451);
+    box-shadow:
+      inset 0 0.2cqw 0 rgba(255, 255, 255, 0.3),
+      0 0.5cqw 0.8cqw rgba(0, 0, 0, 0.45);
+  }
+  .feet {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 7cqw;
+  }
+  .feet i {
+    width: 7cqw;
+    height: 1.6cqw;
+    border-radius: 0 0 1cqw 1cqw;
+    background: linear-gradient(#1b1b1b, #000);
+  }
+
+  /* front panel: black wrinkle (crackle) finish */
+  .face {
+    position: relative;
+    padding: 3cqw 3.2cqw 2.6cqw;
+    border-radius: 1cqw;
+    background-color: var(--crackle);
+    background-image:
+      radial-gradient(
+        70% 60% at 30% 10%,
+        rgba(255, 255, 255, 0.07),
+        transparent 70%
+      ),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='turbulence' baseFrequency='.11' numOctaves='2' seed='9'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeDiffuseLighting lighting-color='%23555' surfaceScale='4.5'%3E%3CfeDistantLight azimuth='225' elevation='42'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+    background-size: auto, 160px;
+    background-blend-mode: normal, multiply;
+    box-shadow:
+      inset 0 0 0 0.25cqw #0a0a0a,
+      inset 0 0.4cqw 1cqw rgba(0, 0, 0, 0.8),
+      0 0 0 0.3cqw #3d423f;
+  }
+  .screw {
+    position: absolute;
+    width: 1.9cqw;
+    height: 1.9cqw;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 35% 30%,
+      #e8eaeb,
+      #8a8f93 45%,
+      #2e3134 80%
+    );
+    box-shadow: 0 0.15cqw 0.3cqw rgba(0, 0, 0, 0.8);
+  }
+  .screw::after {
+    content: "";
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    top: 45%;
+    height: 12%;
+    background: #1c1e20;
+    transform: rotate(var(--a, 30deg));
+    border-radius: 1px;
+  }
+  .s1 {
+    top: 1.2cqw;
+    left: 1.2cqw;
+  }
+  .s2 {
+    top: 1.2cqw;
+    right: 1.2cqw;
+    --a: -20deg;
+  }
+  .s3 {
+    bottom: 1.2cqw;
+    left: 1.2cqw;
+    --a: 70deg;
+  }
+  .s4 {
+    bottom: 1.2cqw;
+    right: 1.2cqw;
+    --a: 10deg;
+  }
+  .eng {
+    font-family: var(--f-label);
+    font-weight: 500;
+    font-size: max(9px, 1.55cqw);
+    letter-spacing: 0.18em;
+    color: #e9e6dc;
+    opacity: 0.88;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
+  }
+
+  /* meter windows: bakelite bezels, backlit cream faces, glass */
+  .windows {
+    display: grid;
+    grid-template-columns: 1fr 1.9fr 1fr;
+    gap: 2.4cqw;
+    align-items: end;
+  }
+  .window {
+    position: relative;
+    border-radius: 2cqw;
+    padding: 1.3cqw;
+    background: linear-gradient(145deg, #2b2826, #0a0908 60%);
+    box-shadow:
+      inset 0 0.2cqw 0.2cqw rgba(255, 255, 255, 0.12),
+      0 0.5cqw 1cqw rgba(0, 0, 0, 0.8),
+      0 0 0 0.2cqw #050505;
+  }
+  .window .glass {
+    position: relative;
+    border-radius: 1.2cqw;
+    overflow: hidden;
+    box-shadow: inset 0 0.4cqw 1.2cqw rgba(0, 0, 0, 0.85);
+    background: #241a10;
+  }
+  .window svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .window .warm {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    opacity: calc(0.35 + var(--power) * 0.65);
+    background: radial-gradient(
+      70% 90% at 50% 75%,
+      #ffd48a,
+      #f2a54a 55%,
+      #8a4a14
+    );
+  }
+  .window .dim {
+    position: absolute;
+    inset: 0;
+    background: #0b0703;
+    opacity: calc(0.78 - var(--power) * 0.78);
+  }
+  .window .shine {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0.18) 0 18%,
+      transparent 19% 62%,
+      rgba(255, 255, 255, 0.06) 63% 70%,
+      transparent 71%
+    );
+  }
+  .window .bloom {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    opacity: calc(var(--power) * 0.55);
+    mix-blend-mode: screen;
+    background: radial-gradient(
+      50% 50% at 50% 70%,
+      rgba(255, 170, 70, 0.35),
+      transparent 70%
+    );
+  }
+  .window .label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2.6cqw;
+    text-align: center;
+  }
+  .window.main {
+    border-radius: 2.6cqw 2.6cqw 2cqw 2cqw;
+  }
+  .needle {
+    transform-origin: 200px 330px;
+    transition: transform 0.7s var(--ease-needle);
+  }
+  .smeter-needle {
+    transform-origin: 100px 168px;
+  }
+
+  .nameplate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.6cqw;
+    margin: 4cqw auto 2.4cqw;
+  }
+  .nameplate .brand {
+    font-family: var(--f-elite);
+    font-size: max(15px, 3.4cqw);
+    color: #f1e7cc;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 0 #000;
+  }
+  .nameplate .chev {
+    color: #c4291c;
+    font-family: var(--f-label);
+    font-weight: 600;
+    font-size: max(11px, 2.2cqw);
+    letter-spacing: -0.15em;
+  }
+  .nameplate .model {
+    display: block;
+    text-align: center;
+    margin-top: 0.3cqw;
+  }
+
+  /* amber readout strip */
+  .readout {
+    display: flex;
+    align-items: center;
+    gap: 1.6cqw;
+    padding: 0.8cqw 1.4cqw;
+    border-radius: 0.8cqw;
+    min-height: 6.2cqw;
+    background: linear-gradient(#0c0805, #150d06);
+    box-shadow:
+      inset 0 0.35cqw 0.9cqw rgba(0, 0, 0, 0.95),
+      0 0 0 0.22cqw #2a2725,
+      0 0.2cqw 0 0.22cqw rgba(255, 255, 255, 0.06);
+  }
+  .readout .prompt {
+    font-family: var(--f-mono);
+    color: var(--amber);
+    font-size: max(15px, 2.6cqw);
+    text-shadow: 0 0 8px rgba(255, 179, 71, 0.7);
+    opacity: calc(0.3 + var(--power) * 0.7);
+  }
+  .readout input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: var(--f-mono);
+    font-size: max(16px, 2.6cqw);
+    color: var(--amber);
+    text-shadow: 0 0 9px rgba(255, 179, 71, 0.55);
+    padding-block: 0.6cqw;
+  }
+  .readout input::placeholder {
+    color: #a8763a;
+    opacity: 0.85;
+  }
+  .readout:focus-within {
+    box-shadow:
+      inset 0 0.35cqw 0.9cqw rgba(0, 0, 0, 0.95),
+      0 0 0 0.22cqw var(--amber);
+  }
+  .readout.shake {
+    animation: shake 0.35s;
+  }
+  @keyframes shake {
+    25% {
+      transform: translateX(-6px);
+    }
+    50% {
+      transform: translateX(5px);
+    }
+    75% {
+      transform: translateX(-3px);
+    }
+  }
+  .station-line {
+    display: none;
+    flex: 1;
+    justify-content: space-between;
+    gap: 2cqw;
+    font-family: var(--f-mono);
+    color: var(--amber);
+    font-size: max(13px, 2.4cqw);
+    text-shadow: 0 0 9px rgba(255, 179, 71, 0.6);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  body.oncall .station-line {
+    display: flex;
+  }
+  body.oncall .tuner-only {
+    display: none !important;
+  }
+
+  /* illuminated push button */
+  .cq {
+    flex: none;
+    border: 0;
+    cursor: pointer;
+    padding: 1.2cqw 2cqw;
+    border-radius: 0.9cqw;
+    min-height: 44px;
+    font-family: var(--f-label);
+    font-weight: 600;
+    font-size: max(12px, 1.9cqw);
+    letter-spacing: 0.18em;
+    color: #2a1606;
+    background: radial-gradient(
+      120% 140% at 50% 20%,
+      #ffd99a,
+      #ffb347 45%,
+      #c06d1c
+    );
+    box-shadow:
+      0 0.55cqw 0 #6b3a0c,
+      0 0.8cqw 1.4cqw rgba(0, 0, 0, 0.7),
+      0 0 calc(var(--power) * 3cqw) rgba(255, 170, 70, 0.45),
+      inset 0 0.2cqw 0 rgba(255, 255, 255, 0.6);
+    transition:
+      transform 0.08s,
+      box-shadow 0.08s;
+  }
+  .cq:active {
+    transform: translateY(0.45cqw);
+    box-shadow:
+      0 0.1cqw 0 #6b3a0c,
+      0 0.3cqw 0.6cqw rgba(0, 0, 0, 0.7),
+      inset 0 0.2cqw 0 rgba(255, 255, 255, 0.4);
+  }
+
+  /* lower control row */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.9fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    gap: 1.4cqw;
+    margin-top: 3cqw;
+  }
+  .ctl {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1cqw;
+  }
+  .knob {
+    position: relative;
+    width: 9cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 36% 30%,
+        rgba(255, 255, 255, 0.28),
+        transparent 26%
+      ),
+      radial-gradient(circle, #2b2522 0 46%, #120f0e 47% 50%, transparent 51%),
+      repeating-conic-gradient(
+        #0c0a09 0 5deg,
+        #3b3431 5deg 7deg,
+        #0c0a09 7deg 10deg
+      );
+    box-shadow:
+      0 0.8cqw 1.2cqw rgba(0, 0, 0, 0.75),
+      0 0 0 0.3cqw #0a0a0a,
+      inset 0 -0.3cqw 0.4cqw rgba(0, 0, 0, 0.6);
+  }
+  .knob::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - 0.25cqw);
+    top: 10%;
+    width: 0.5cqw;
+    height: 30%;
+    border-radius: 1px;
+    background: #f1ece0;
+    transform-origin: 50% 133%;
+    transform: rotate(var(--r, 0deg));
+  }
+  .knob-scale {
+    position: absolute;
+    inset: -38%;
+    pointer-events: none;
+  }
+
+  .tune {
+    position: relative;
+    width: 19cqw;
+    aspect-ratio: 1;
+  }
+  .tune .ring,
+  .tune .dial,
+  .tune .spinner {
+    position: absolute;
+    border-radius: 50%;
+    transition: transform 0.7s var(--ease-needle);
+    transform: rotate(var(--turn, 0deg));
+  }
+  .tune .ring {
+    inset: 0;
+    background: repeating-conic-gradient(
+      #e9edef 0 1.6deg,
+      #7b8186 1.6deg 3.2deg,
+      #2f3337 3.2deg 4deg
+    );
+    box-shadow:
+      0 1cqw 1.6cqw rgba(0, 0, 0, 0.8),
+      inset 0 0 0 0.4cqw rgba(0, 0, 0, 0.35);
+  }
+  .tune .dial {
+    inset: 9%;
+    background: radial-gradient(circle, #d7dbdd, #a9aeb2 60%, #70767a);
+    box-shadow: inset 0 0.3cqw 0.6cqw rgba(0, 0, 0, 0.6);
+  }
+  .tune .dial svg {
+    width: 100%;
+    height: 100%;
+  }
+  .tune .spinner {
+    inset: 26%;
+    background:
+      radial-gradient(circle at 50% 50%, #2a2421 0 16%, transparent 17%),
+      conic-gradient(
+        from 0deg,
+        #191514 0 18deg,
+        transparent 18deg 102deg,
+        #191514 102deg 138deg,
+        transparent 138deg 222deg,
+        #191514 222deg 258deg,
+        transparent 258deg 342deg,
+        #191514 342deg
+      ),
+      radial-gradient(circle, transparent 0 58%, #110e0d 59%);
+    box-shadow: 0 0.7cqw 1cqw rgba(0, 0, 0, 0.8);
+  }
+  .tune .gloss {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.35),
+      transparent 35%
+    );
+  }
+  .tune .index {
+    position: absolute;
+    top: -1.6cqw;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border: 0.9cqw solid transparent;
+    border-top: 1.3cqw solid #c4291c;
+    border-bottom: 0;
+  }
+
+  .jewel {
+    position: relative;
+    width: 4.6cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 0.55cqw #9aa0a4,
+      0 0 0 0.8cqw #2a2d30,
+      0 0.6cqw 1cqw rgba(0, 0, 0, 0.8);
+    background:
+      repeating-conic-gradient(
+        rgba(255, 255, 255, 0.14) 0 15deg,
+        rgba(0, 0, 0, 0.16) 15deg 30deg
+      ),
+      radial-gradient(circle at 40% 35%, #6a2a22, #3a0f0a 70%);
+  }
+  .jewel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    opacity: var(--lamp);
+    background:
+      repeating-conic-gradient(
+        rgba(255, 255, 255, 0.2) 0 15deg,
+        rgba(0, 0, 0, 0.1) 15deg 30deg
+      ),
+      radial-gradient(
+        circle at 40% 35%,
+        #fff1e6,
+        #ff6a45 30%,
+        #d6230c 65%,
+        #7a0f05
+      );
+    box-shadow:
+      0 0 1.2cqw 0.4cqw rgba(255, 74, 46, 0.75),
+      0 0 5cqw 1cqw rgba(255, 74, 46, 0.35);
+  }
+
+  .toggle {
+    position: relative;
+    width: 6cqw;
+    height: 6cqw;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+  }
+  .toggle .plate {
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 35% 30%,
+      #f4f6f7,
+      #9097a0 55%,
+      #3b4046
+    );
+    box-shadow: 0 0.3cqw 0.5cqw rgba(0, 0, 0, 0.7);
+  }
+  .toggle .bat {
+    position: absolute;
+    left: calc(50% - 0.9cqw);
+    top: 6%;
+    width: 1.8cqw;
+    height: 50%;
+    border-radius: 1cqw 1cqw 0.4cqw 0.4cqw;
+    transform-origin: 50% 88%;
+    background: linear-gradient(
+      90deg,
+      #8d949a,
+      #fbfcfc 40%,
+      #a4abb1 70%,
+      #5b6167
+    );
+    box-shadow: 0 0.3cqw 0.4cqw rgba(0, 0, 0, 0.55);
+    transition: transform 0.12s;
+  }
+  .toggle[aria-pressed="false"] .bat {
+    transform: rotate(180deg);
+  }
+  .ctl .state {
+    font-family: var(--f-label);
+    font-size: max(9px, 1.4cqw);
+    letter-spacing: 0.16em;
+    color: #e9e6dc;
+    opacity: 0.7;
+  }
+
+  /* weekly frequencies: ivory preset keys in a recessed bay */
+  .bay {
+    margin-top: 3.2cqw;
+    padding: 1.6cqw 1.6cqw 2cqw;
+    border-radius: 0.9cqw;
+    background: #0a0908;
+    box-shadow:
+      inset 0 0.5cqw 1.2cqw rgba(0, 0, 0, 0.95),
+      0 0 0 0.2cqw #2c2927;
+  }
+  .bay .eng {
+    display: block;
+    margin: 0 0 1.4cqw 0.4cqw;
+  }
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2cqw;
+  }
+  .key {
+    cursor: pointer;
+    border: 0;
+    text-align: left;
+    padding: 1cqw 1.3cqw 1.2cqw;
+    min-height: 48px;
+    border-radius: 0.4cqw 0.4cqw 0.9cqw 0.9cqw;
+    color: #2a211b;
+    background: linear-gradient(#f7efdc, #e2d6bb 70%, #cdbf9f);
+    box-shadow:
+      0 0.7cqw 0 #8b7d60,
+      0 1cqw 1.2cqw rgba(0, 0, 0, 0.8),
+      inset 0 0.15cqw 0 #fff,
+      inset 0 -0.3cqw 0.4cqw rgba(120, 100, 60, 0.25);
+    transition:
+      transform 0.09s,
+      box-shadow 0.09s;
+  }
+  .key b {
+    display: block;
+    font-family: var(--f-mono);
+    font-weight: 400;
+    font-size: max(13px, 2.1cqw);
+  }
+  .key span {
+    display: block;
+    font-family: var(--f-label);
+    font-size: max(10px, 1.5cqw);
+    letter-spacing: 0.04em;
+    color: #5a4a3a;
+    line-height: 1.2;
+  }
+  .key:hover {
+    background: linear-gradient(#fbf5e6, #e8dcc2 70%, #d3c5a5);
+  }
+  .key:active,
+  .key[aria-pressed="true"] {
+    transform: translateY(0.55cqw);
+    box-shadow:
+      0 0.15cqw 0 #8b7d60,
+      0 0.3cqw 0.5cqw rgba(0, 0, 0, 0.8),
+      inset 0 0.3cqw 0.5cqw rgba(120, 100, 60, 0.35);
+  }
+
+  /* desk microphone */
+  .mic {
+    flex: none;
+    width: clamp(74px, 12vw, 128px);
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    --tally: 0;
+  }
+  .mic svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    filter: drop-shadow(0 18px 14px rgba(0, 0, 0, 0.7));
+  }
+  .mic .ptt {
+    transition: transform 0.12s ease;
+  }
+  .mic.pressed .ptt {
+    transform: translateY(3px);
+  }
+  .mic .tally {
+    opacity: var(--tally);
+  }
+  .mic .head-glint {
+    opacity: calc(0.25 + var(--tally) * 0.35);
+  }
+  .mic-caption {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+    font-family: var(--f-label);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-dim);
+  }
+
+  /* ---------- QSO transcript (no paper: light on the night) ---------- */
+  .qso {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-block: clamp(28px, 6vh, 64px);
+    padding-left: clamp(56px, 6vw, 110px);
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+    max-width: 700px;
+  }
+  .qso-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+    align-items: end;
+  }
+  .qso-head .eyebrow {
+    grid-column: 1 / -1;
+    font-family: var(--f-label);
+    letter-spacing: 0.28em;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+  .qso-head h2 {
+    margin: 0;
+    font-family: var(--f-elite);
+    font-weight: 400;
+    font-size: clamp(30px, 3.6vw, 44px);
+    color: var(--ink);
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 24px rgba(160, 255, 220, 0.18);
+  }
+  .qso-head .clock {
+    font-family: var(--f-mono);
+    font-size: 22px;
+    color: var(--amber);
+    text-shadow: 0 0 10px rgba(255, 179, 71, 0.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .qso-head .place {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--ink-dim);
+    font-size: 15px;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--f-label);
+    letter-spacing: 0.14em;
+    font-size: 13px;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .status i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6cffb8;
+    box-shadow: 0 0 10px #6cffb8;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .rule {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(232, 228, 216, 0.35), transparent);
+  }
+  .lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+    max-height: 58vh;
+    padding-right: 6px;
+    scrollbar-width: thin;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 74px 1fr;
+    gap: 12px;
+    font-size: 17px;
+    line-height: 1.55;
+    animation: flicker 0.7s steps(1, end) both;
+  }
+  .line .who {
+    font-family: var(--f-label);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    padding-top: 4px;
+    color: var(--ink-dim);
+  }
+  .line.op .text {
+    color: var(--op);
+    text-shadow: 0 0 14px rgba(255, 190, 110, 0.18);
+  }
+  .line.you .text {
+    color: var(--ink);
+  }
+  .line .text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .line .note {
+    grid-column: 2;
+    margin-top: -8px;
+    font-size: 15px;
+    color: var(--amber-soft);
+    animation: fade 0.8s ease both 0.5s;
+  }
+  .line .note.ok {
+    color: var(--ok);
+  }
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    vertical-align: text-bottom;
+    background: var(--op);
+    margin-left: 2px;
+    animation: blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes flicker {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    18% {
+      opacity: 0.2;
+    }
+    28% {
+      opacity: 0.9;
+    }
+    36% {
+      opacity: 0.5;
+    }
+    48% {
+      opacity: 1;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  .hint {
+    margin-top: auto;
+    font-family: var(--f-label);
+    letter-spacing: 0.16em;
+    font-size: 12px;
+    color: var(--ink-dim);
+  }
+
+  /* ---------- QSL card ---------- */
+  .report {
+    display: none;
+    position: relative;
+    z-index: 2;
+    padding-block: 40px 60px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  body.on-report .report {
+    display: block;
+  }
+  body.on-report .split {
+    display: none;
+  }
+  .qsl {
+    position: relative;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 40px);
+    color: var(--paper-ink);
+    transform: rotate(-0.6deg);
+    background-color: var(--paper);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 .35  0 0 0 0 .28  0 0 0 0 .2  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+    box-shadow:
+      0 30px 60px rgba(0, 0, 0, 0.7),
+      0 2px 0 rgba(0, 0, 0, 0.2);
+    animation: drop 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+  }
+  @keyframes drop {
+    from {
+      opacity: 0;
+      transform: translateY(-30px) rotate(2deg);
+    }
+  }
+  .qsl h1 {
+    margin: 0 0 18px;
+    font-family: var(--f-elite);
+    font-weight: 400;
+    font-size: clamp(18px, 2.6vw, 24px);
+    letter-spacing: 0.04em;
+    text-wrap: balance;
+  }
+  .qsl .stamp {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    padding: 6px 12px;
+    border: 3px solid #a3261b;
+    border-radius: 6px;
+    color: #a3261b;
+    font-family: var(--f-elite);
+    font-size: 20px;
+    transform: rotate(9deg);
+    opacity: 0.82;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 18px;
+    padding: 14px 0;
+    border-block: 1px dashed rgba(42, 33, 27, 0.4);
+  }
+  .fields dt {
+    font-family: var(--f-label);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: #5a4a3a;
+  }
+  .fields dd {
+    margin: 2px 0 0;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .qsl h3 {
+    margin: 20px 0 8px;
+    font-family: var(--f-label);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: #5a4a3a;
+  }
+  .qsl p,
+  .qsl li {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .qsl ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .err {
+    margin-bottom: 12px;
+  }
+  .err .bad {
+    text-decoration: line-through;
+    text-decoration-color: #a3261b;
+  }
+  .err .why {
+    color: #5a4a3a;
+    font-size: 14px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .btn {
+    cursor: pointer;
+    border: 1px solid rgba(42, 33, 27, 0.4);
+    background: transparent;
+    padding: 12px 20px;
+    min-height: 46px;
+    border-radius: 6px;
+    font-family: var(--f-label);
+    letter-spacing: 0.16em;
+    font-size: 14px;
+    color: var(--paper-ink);
+  }
+  .btn.primary {
+    background: #2a211b;
+    color: var(--paper);
+    border-color: #2a211b;
+  }
+  .note-proto {
+    font-size: 13px;
+    color: #5a4a3a;
+  }
+
+  /* ---------- footer + prototype tag ---------- */
+  footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 16px;
+    padding-block: 10px 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+  footer a {
+    color: var(--ink);
+  }
+  .tag {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: max(10px, env(safe-area-inset-left, 0px));
+    z-index: 5;
+    font-family: var(--f-label);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dim);
+    border: 1px solid rgba(232, 228, 216, 0.25);
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+
+  /* ---------- phone: split top / bottom, horizontal rift ---------- */
+  @media (max-width: 820px) {
+    .split {
+      flex-direction: column;
+    }
+    .pane-left {
+      flex: 1 0 auto;
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      transition: none;
+    }
+    .pane-right {
+      flex: 0 0 auto;
+      max-height: 0;
+      transition:
+        max-height 1s var(--ease-split),
+        opacity 0.6s ease 0.5s;
+      background: linear-gradient(rgba(5, 8, 13, 0.1), rgba(5, 8, 13, 0.6));
+    }
+    body.split-open .pane-left {
+      flex-basis: auto;
+      padding-block: 18px 22px;
+    }
+    body.split-open .pane-right {
+      max-height: 2000px;
+    }
+    .rift,
+    body.split-open .rift {
+      position: relative;
+      left: auto;
+      top: auto;
+      bottom: auto;
+      flex: 0 0 2px;
+      width: 100%;
+      transition: none;
+    }
+    .rift > * {
+      left: 0;
+      right: 0;
+      top: 50%;
+      bottom: auto;
+      transform: translateY(-50%);
+      width: auto !important;
+    }
+    .rift .core {
+      height: 160px;
+    }
+    /* the same strands, turned to run across the screen */
+    .rift .core svg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 160px;
+      height: 100vw;
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+    .rift .flare {
+      height: 160px;
+      clip-path: none;
+      background: linear-gradient(
+        transparent,
+        rgba(60, 140, 255, 0.3) 30%,
+        rgba(70, 255, 170, 0.5) 44%,
+        #fff 50%,
+        rgba(150, 90, 255, 0.45) 57%,
+        rgba(60, 220, 230, 0.3) 70%,
+        transparent
+      );
+    }
+    .rift .streaks {
+      height: 70px;
+      -webkit-mask: linear-gradient(
+        90deg,
+        transparent,
+        #000 10%,
+        #000 90%,
+        transparent
+      );
+      mask: linear-gradient(
+        90deg,
+        transparent,
+        #000 10%,
+        #000 90%,
+        transparent
+      );
+      background:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0 7px,
+          rgba(120, 255, 210, 0.35) 7px 8px,
+          transparent 8px 13px
+        ),
+        linear-gradient(
+          transparent,
+          rgba(110, 255, 200, 0.4) 40%,
+          rgba(255, 255, 255, 0.7) 50%,
+          rgba(150, 110, 255, 0.4) 60%,
+          transparent
+        );
+    }
+    @keyframes rift-in {
+      from {
+        transform: translateY(-50%) scaleX(0);
+        filter: brightness(3);
+      }
+      to {
+        transform: translateY(-50%) scaleX(1);
+        filter: brightness(1);
+      }
+    }
+    @keyframes rift-flare {
+      0% {
+        opacity: 0;
+        transform: translateY(-50%) scaleY(0.1);
+      }
+      35% {
+        opacity: 1;
+        transform: translateY(-50%) scaleY(1.6);
+      }
+      100% {
+        opacity: 0.8;
+        transform: translateY(-50%) scaleY(1);
+      }
+    }
+    @keyframes rift-out-wide {
+      to {
+        opacity: 0;
+        transform: translateY(-50%) scaleY(0);
+      }
+    }
+    @keyframes rift-out-core {
+      0% {
+        transform: translateY(-50%) scaleX(1);
+      }
+      55% {
+        transform: translateY(-50%) scaleX(0.04);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-50%) scaleX(0);
+        opacity: 0;
+      }
+    }
+    .deskset {
+      align-items: flex-end;
+    }
+    .keys {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .qso {
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      max-width: none;
+    }
+    .lines {
+      max-height: none;
+    }
+    .line {
+      grid-template-columns: 1fr;
+      gap: 2px;
+      font-size: 16px;
+    }
+    .line .note {
+      grid-column: 1;
+      margin-top: 0;
+    }
+    .fields {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .desk {
+      height: 22vh;
+    }
+  }
+  /* phone: the receiver takes the full width, the mic stands on the desk under it */
+  @media (max-width: 820px) {
+    .deskset {
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .rig {
+      width: 100%;
+    }
+    .mic {
+      width: 72px;
+    }
+    body.oncall .mic {
+      width: 56px;
+    }
+    body.oncall .mic-caption {
+      display: none;
+    }
+    .desk {
+      transition: opacity 0.8s ease;
+    }
+    body.oncall .desk {
+      opacity: 0;
+    }
+    .readout {
+      flex-wrap: wrap;
+      padding: 8px 10px;
+    }
+    .readout input {
+      flex-basis: 70%;
+    }
+    .cq {
+      flex: 1 1 100%;
+    }
+    .nameplate {
+      margin-top: 28px;
+    }
+    .controls {
+      grid-template-columns: 1fr 1.9fr 1fr 1fr;
+    }
+    .controls .ctl:first-child {
+      display: none;
+    }
+    .eng {
+      font-size: 8px;
+      letter-spacing: 0.1em;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
+  }
+</style>
+
+<div class="sky" aria-hidden="true">
+  <canvas id="stars"></canvas>
+  <div class="aurora"></div>
+</div>
+<div class="desk" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
+<span class="tag">PROTOTIPO · v2</span>
+
+<main class="stage">
+  <div class="split">
+    <section class="pane-left" aria-label="Equipo de radio">
+      <div class="deskset">
+        <div class="rig" id="rig">
+          <div class="cabinet">
+            <div class="lid"></div>
+            <div class="face">
+              <i class="screw s1"></i><i class="screw s2"></i
+              ><i class="screw s3"></i><i class="screw s4"></i>
+
+              <div class="windows" aria-hidden="true">
+                <div class="window">
+                  <div class="glass">
+                    <svg id="smeter" viewBox="0 0 200 140"></svg>
+                    <div class="warm"></div>
+                    <div class="dim"></div>
+                    <div class="bloom"></div>
+                    <div class="shine"></div>
+                  </div>
+                  <span class="label eng">S · Units</span>
+                </div>
+                <div class="window main">
+                  <div class="glass">
+                    <svg id="dial" viewBox="0 0 400 200"></svg>
+                    <div class="warm"></div>
+                    <div class="dim"></div>
+                    <div class="bloom"></div>
+                    <div class="shine"></div>
+                  </div>
+                  <span class="label eng">Megacycles</span>
+                </div>
+                <div class="window">
+                  <div class="glass">
+                    <svg id="band" viewBox="0 0 200 140"></svg>
+                    <div class="warm"></div>
+                    <div class="dim"></div>
+                    <div class="bloom"></div>
+                    <div class="shine"></div>
+                  </div>
+                  <span class="label eng">Band spread</span>
+                </div>
+              </div>
+
+              <div class="nameplate">
+                <span class="chev" aria-hidden="true">›››</span>
+                <span
+                  ><span class="brand">CQ talk</span
+                  ><span class="model eng"
+                    >Model 69 · SSB transceiver</span
+                  ></span
+                >
+                <span class="chev" aria-hidden="true">‹‹‹</span>
+              </div>
+
+              <form class="readout" id="tuner" autocomplete="off">
+                <span class="prompt tuner-only" aria-hidden="true">&gt;</span>
+                <label
+                  for="topic"
+                  class="tuner-only"
+                  style="
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    overflow: hidden;
+                    clip: rect(0 0 0 0);
+                  "
+                  >¿De qué querés hablar?</label
+                >
+                <input
+                  id="topic"
+                  class="tuner-only"
+                  placeholder="¿De qué querés hablar?"
+                  spellcheck="false"
+                />
+                <button class="cq tuner-only" type="submit">LLAMAR · CQ</button>
+                <div class="station-line" aria-hidden="true">
+                  <span id="sl-call">JA1·AI</span
+                  ><span id="sl-freq">14.205 MHz</span
+                  ><span id="sl-clock">00:00</span>
+                </div>
+              </form>
+
+              <div class="controls">
+                <div class="ctl" aria-hidden="true">
+                  <span class="eng">Tone</span>
+                  <div class="knob" style="--r: -40deg"></div>
+                </div>
+                <div class="ctl" aria-hidden="true">
+                  <span class="eng">R.F. Gain</span>
+                  <div class="knob" style="--r: 60deg"></div>
+                </div>
+                <div class="ctl" aria-hidden="true">
+                  <div class="tune" id="tune">
+                    <div class="ring"></div>
+                    <div class="dial">
+                      <svg viewBox="0 0 100 100" id="tunescale"></svg>
+                    </div>
+                    <div class="spinner"></div>
+                    <div class="gloss"></div>
+                    <span class="index"></span>
+                  </div>
+                </div>
+                <div class="ctl">
+                  <span class="eng">On air</span>
+                  <div
+                    class="jewel"
+                    role="img"
+                    aria-label="Lámpara ON AIR"
+                  ></div>
+                  <span class="state" id="lampstate">OFF</span>
+                </div>
+                <div class="ctl">
+                  <span class="eng" id="snd-label">Sonido</span
+                  ><button
+                    class="toggle"
+                    id="sound"
+                    aria-pressed="true"
+                    aria-labelledby="snd-label snd-state"
+                  >
+                    <span class="plate"></span><span class="bat"></span></button
+                  ><span class="state" id="snd-state">ON</span>
+                </div>
+              </div>
+
+              <div class="bay tuner-only">
+                <span class="eng">Frecuencias de la semana</span>
+                <div class="keys" id="keys"></div>
+              </div>
+            </div>
+          </div>
+          <div class="feet" aria-hidden="true"><i></i><i></i></div>
+        </div>
+
+        <div>
+          <button class="mic" id="mic" aria-label="Llamar">
+            <svg viewBox="0 0 120 270" aria-hidden="true">
+              <defs>
+                <linearGradient id="chrome" x1="0" x2="1">
+                  <stop offset="0" stop-color="#5b6167" />
+                  <stop offset=".35" stop-color="#fbfcfc" />
+                  <stop offset=".6" stop-color="#9aa1a7" />
+                  <stop offset="1" stop-color="#3b4046" />
+                </linearGradient>
+                <linearGradient id="chromeV" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#f4f6f7" />
+                  <stop offset=".5" stop-color="#8d949a" />
+                  <stop offset="1" stop-color="#3b4046" />
+                </linearGradient>
+                <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#4a4f4c" />
+                  <stop offset=".25" stop-color="#2a2d2b" />
+                  <stop offset="1" stop-color="#0d0e0d" />
+                </linearGradient>
+                <linearGradient id="headg" x1="0" x2="1">
+                  <stop offset="0" stop-color="#0a0a0a" />
+                  <stop offset=".3" stop-color="#2d2d2d" />
+                  <stop offset=".55" stop-color="#141414" />
+                  <stop offset="1" stop-color="#050505" />
+                </linearGradient>
+                <pattern
+                  id="holes"
+                  width="5"
+                  height="5"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <rect width="5" height="5" fill="#262626" />
+                  <circle cx="2.5" cy="2.5" r="1.25" fill="#050505" />
+                </pattern>
+                <radialGradient id="tallyG">
+                  <stop offset="0" stop-color="#fff1e6" />
+                  <stop offset=".35" stop-color="#ff5a3a" />
+                  <stop offset="1" stop-color="#ff2a10" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+              <!-- head -->
+              <rect
+                x="30"
+                y="14"
+                width="60"
+                height="112"
+                rx="14"
+                fill="url(#headg)"
+                stroke="url(#chrome)"
+                stroke-width="3"
+              />
+              <rect
+                x="38"
+                y="24"
+                width="44"
+                height="92"
+                rx="8"
+                fill="url(#holes)"
+              />
+              <rect
+                class="head-glint"
+                x="40"
+                y="22"
+                width="7"
+                height="96"
+                rx="3.5"
+                fill="#fff"
+                opacity=".3"
+              />
+              <!-- yoke + stem -->
+              <path
+                d="M24 74 Q24 140 60 140 Q96 140 96 74"
+                fill="none"
+                stroke="url(#chrome)"
+                stroke-width="5"
+              />
+              <circle cx="24" cy="74" r="5" fill="url(#chrome)" />
+              <circle cx="96" cy="74" r="5" fill="url(#chrome)" />
+              <rect x="55" y="138" width="10" height="78" fill="url(#chrome)" />
+              <!-- base -->
+              <path
+                d="M10 262 L22 214 Q24 206 34 206 L86 206 Q96 206 98 214 L110 262 Z"
+                fill="url(#base)"
+              />
+              <path d="M10 262 L110 262" stroke="#000" stroke-width="3" />
+              <path
+                d="M22 214 Q24 206 34 206 L86 206 Q96 206 98 214"
+                fill="none"
+                stroke="rgba(255,255,255,.25)"
+                stroke-width="1.5"
+              />
+              <g class="ptt">
+                <rect
+                  x="28"
+                  y="222"
+                  width="64"
+                  height="9"
+                  rx="4"
+                  fill="url(#chromeV)"
+                  stroke="#202326"
+                  stroke-width="1"
+                />
+              </g>
+              <circle
+                cx="60"
+                cy="248"
+                r="4.2"
+                fill="#3a0f0a"
+                stroke="#9aa0a4"
+                stroke-width="1.2"
+              />
+              <circle
+                class="tally"
+                cx="60"
+                cy="248"
+                r="10"
+                fill="url(#tallyG)"
+              />
+            </svg>
+            <span class="mic-caption" id="mic-caption">PTT · LLAMAR</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="rift" aria-hidden="true">
+      <div class="flare"></div>
+      <div class="streaks"></div>
+      <div class="core">
+        <svg id="wave" viewBox="0 0 100 1000" preserveAspectRatio="none"></svg>
+      </div>
+      <svg width="0" height="0" style="position: absolute">
+        <filter id="rift-wave" x="-40%" y="-5%" width="180%" height="110%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.002 0.004"
+            numOctaves="1"
+            seed="4"
+            result="n"
+          >
+            <animate
+              attributeName="baseFrequency"
+              dur="10s"
+              values="0.002 0.004;0.0024 0.0055;0.0021 0.0045;0.002 0.004"
+              repeatCount="indefinite"
+            />
+          </feTurbulence>
+          <feColorMatrix
+            in="n"
+            type="matrix"
+            values="1 0 0 0 0  0 0 0 0 0.5  0 0 0 0 0  0 0 0 0 1"
+            result="m"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="m"
+            scale="34"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </svg>
+    </div>
+
+    <section class="pane-right" aria-label="Conversación">
+      <div class="qso">
+        <div class="qso-head">
+          <span class="eyebrow">EN CONTACTO CON</span>
+          <h2 id="q-call">JA1·AI</h2>
+          <span class="clock" id="q-clock" aria-label="Duración">00:00</span>
+          <p class="place" id="q-place">
+            Tokio, Japón · operador IA · 14.205 MHz
+          </p>
+        </div>
+        <div class="status" role="status">
+          <i></i><span id="q-status">Sintonizando…</span>
+        </div>
+        <div class="rule"></div>
+        <ol class="lines" id="lines" aria-live="polite"></ol>
+        <p class="hint">Tocá el micrófono para cortar · 73</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="report" aria-label="Tarjeta QSL">
+    <article class="qsl">
+      <span class="stamp">73 · QSL</span>
+      <h1>TARJETA QSL · CONFIRMO NUESTRO QSO</h1>
+      <dl class="fields" id="fields"></dl>
+      <h3>ERRORES REGISTRADOS</h3>
+      <div class="err">
+        <div>
+          <b>Dijiste:</b>
+          <span class="bad"
+            >I think is a very interesting topic, I follow the news since many
+            years.</span
+          >
+        </div>
+        <div>
+          <b>Mejor:</b> I think it’s a really interesting topic — I’ve been
+          following the news for years.
+        </div>
+        <div class="why">
+          En inglés el sujeto no se omite: “it is”. Para algo que empezó en el
+          pasado y sigue: present perfect continuous + “for”.
+        </div>
+      </div>
+      <div class="err">
+        <div>
+          <b>Dijiste:</b>
+          <span class="bad"
+            >The most important for me is how people discuss about it in
+            internet.</span
+          >
+        </div>
+        <div>
+          <b>Mejor:</b> What matters most to me is how people discuss it online.
+        </div>
+        <div class="why">
+          “Discuss” no lleva “about”. “In internet” → “online”.
+        </div>
+      </div>
+      <h3>VOCABULARIO PARA SUMAR</h3>
+      <ul>
+        <li><b>keep up with</b>: mantenerse al día con algo</li>
+        <li><b>what matters most</b>: lo que más importa</li>
+        <li><b>weigh in on</b>: opinar sobre un tema</li>
+        <li><b>catch someone’s attention</b>: llamar la atención</li>
+      </ul>
+      <h3>PARA PRACTICAR MAÑANA</h3>
+      <p>
+        1. Armá 3 frases con “I’ve been + -ing + for…”.<br />2. Usá “discuss”
+        sin “about” en tu próximo QSO.<br />3. Probá “online” en vez de “in
+        internet”.
+      </p>
+      <div class="actions">
+        <button class="btn" type="button" id="pdf">DESCARGAR QSL (PDF)</button
+        ><button class="btn primary" type="button" id="again">NUEVO QSO</button>
+      </div>
+      <p class="note-proto" id="pdf-note" hidden>
+        En la app descarga el PDF; en el prototipo no hace nada.
+      </p>
+    </article>
+  </section>
+
+  <footer>
+    Gratis · tu API key queda solo en este navegador ·
+    <a href="#key">Configurar key</a> · <a href="#qsl">Mis QSL</a>
+  </footer>
+</main>
+
+<script>
+  (() => {
+    const $ = (s) => document.querySelector(s);
+    const body = document.body;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const NS = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs, parent) => {
+      const n = document.createElementNS(NS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      parent && parent.appendChild(n);
+      return n;
+    };
+    const polar = (cx, cy, r, deg) => {
+      const a = ((deg - 90) * Math.PI) / 180;
+      return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    };
+
+    /* ---------- data ---------- */
+    const PRESETS = [
+      ["3.650", "Salud y ciencia", 4],
+      ["7.074", "Mundial 2026", 17],
+      ["10.136", "Inteligencia artificial", 29],
+      ["14.205", "Cambio climático", 44],
+      ["18.110", "Exploración espacial", 58],
+      ["21.300", "Economía global", 70],
+      ["24.950", "Elecciones", 83],
+      ["28.400", "Cine y series", 95],
+    ];
+    const STATIONS = [
+      ["JA1·AI", "Tokio, Japón"],
+      ["G4·AI", "Londres, Reino Unido"],
+      ["VK2·AI", "Sídney, Australia"],
+      ["W2·AI", "Nueva York, EE.UU."],
+      ["VE3·AI", "Toronto, Canadá"],
+      ["OH2·AI", "Helsinki, Finlandia"],
+    ];
+    const script = (topic, call) => [
+      [
+        "op",
+        `CQ, CQ, this is ${call}. I copy you loud and clear! So, ${topic} — what’s your take on it? Over.`,
+      ],
+      [
+        "you",
+        "I think is a very interesting topic, I follow the news since many years. Over.",
+        "fix",
+        "I think it’s a really interesting topic — I’ve been following the news for years.",
+      ],
+      [
+        "op",
+        "For years? Nice. What caught your attention the most lately? Over.",
+      ],
+      [
+        "you",
+        "The most important for me is how people discuss about it in internet. Over.",
+        "fix",
+        "What matters most to me is how people discuss it online.",
+      ],
+      [
+        "op",
+        "Good point. Do you think online debates change what people actually believe? Over.",
+      ],
+      [
+        "you",
+        "Yes, I agree with that. People are more influenced than before. Over.",
+        "ok",
+      ],
+      ["op", "Roger that. Can you give me a recent example? Over."],
+    ];
+    const hash = (s) =>
+      [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+    /* ---------- stars ---------- */
+    const cv = $("#stars"),
+      cx = cv.getContext("2d");
+    let stars = [];
+    const sizeStars = () => {
+      cv.width = innerWidth * devicePixelRatio;
+      cv.height = innerHeight * devicePixelRatio;
+      stars = Array.from({ length: 140 }, () => ({
+        x: Math.random(),
+        y: Math.random() * 0.7,
+        r: Math.random() * 1.1 + 0.2,
+        p: Math.random() * 6,
+      }));
+    };
+    const drawStars = (t) => {
+      cx.clearRect(0, 0, cv.width, cv.height);
+      for (const s of stars) {
+        cx.globalAlpha =
+          0.35 + 0.45 * (reduced ? 0.5 : (Math.sin(t / 900 + s.p) + 1) / 2);
+        cx.fillStyle = "#e8ecf0";
+        cx.beginPath();
+        cx.arc(s.x * cv.width, s.y * cv.height, s.r * devicePixelRatio, 0, 7);
+        cx.fill();
+      }
+      if (!reduced) requestAnimationFrame(drawStars);
+    };
+    sizeStars();
+    addEventListener("resize", sizeStars);
+    requestAnimationFrame(drawStars);
+
+    /* ---------- main dial (Megacycles) ---------- */
+    const dial = $("#dial");
+    el("rect", { width: 400, height: 200, fill: "#efe3c4" }, dial);
+    const P = [200, 330],
+      A0 = -38,
+      A1 = 38;
+    const arc = (r, color, w) => {
+      const [x0, y0] = polar(...P, r, A0),
+        [x1, y1] = polar(...P, r, A1);
+      el(
+        "path",
+        {
+          d: `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`,
+          fill: "none",
+          stroke: color,
+          "stroke-width": w,
+        },
+        dial,
+      );
+    };
+    const ticks = (r, n, len, major, color, labels) => {
+      for (let i = 0; i <= n; i++) {
+        const a = A0 + ((A1 - A0) * i) / n,
+          big = i % major === 0;
+        const [x0, y0] = polar(...P, r, a),
+          [x1, y1] = polar(...P, r - (big ? len * 1.7 : len), a);
+        el(
+          "line",
+          {
+            x1: x0,
+            y1: y0,
+            x2: x1,
+            y2: y1,
+            stroke: color,
+            "stroke-width": big ? 1.3 : 0.7,
+          },
+          dial,
+        );
+        if (big && labels) {
+          const [tx, ty] = polar(...P, r - len * 3.3, a);
+          const t = el(
+            "text",
+            {
+              x: tx,
+              y: ty,
+              "text-anchor": "middle",
+              "dominant-baseline": "middle",
+              "font-family": "Oswald, sans-serif",
+              "font-size": 11,
+              fill: color,
+              transform: `rotate(${a} ${tx} ${ty})`,
+            },
+            dial,
+          );
+          t.textContent = labels[i / major];
+        }
+      }
+    };
+    arc(292, "#2a2620", 1.2);
+    ticks(292, 50, 5, 5, "#2a2620", [
+      "3",
+      "5",
+      "7",
+      "10",
+      "12",
+      "14",
+      "18",
+      "21",
+      "24",
+      "27",
+      "30",
+    ]);
+    arc(255, "#b0130a", 1);
+    ticks(255, 8, 5, 1, "#b0130a", [
+      "80",
+      "40",
+      "30",
+      "20",
+      "17",
+      "15",
+      "12",
+      "10",
+      "M",
+    ]);
+    arc(222, "#2a2620", 0.9);
+    ticks(222, 100, 3, 10, "#2a2620", [
+      "0",
+      "10",
+      "20",
+      "30",
+      "40",
+      "50",
+      "60",
+      "70",
+      "80",
+      "90",
+      "100",
+    ]);
+    const t1 = el(
+      "text",
+      {
+        x: 200,
+        y: 188,
+        "text-anchor": "middle",
+        "font-family": "Oswald, sans-serif",
+        "font-size": 9,
+        "letter-spacing": 2,
+        fill: "#5a4a3a",
+      },
+      dial,
+    );
+    t1.textContent = "MC · AMATEUR BANDS · LOG";
+    const needle = el("g", { class: "needle" }, dial);
+    el(
+      "line",
+      {
+        x1: 200,
+        y1: 330,
+        x2: 200,
+        y2: 30,
+        stroke: "rgba(0,0,0,.25)",
+        "stroke-width": 3,
+        transform: "translate(2 1)",
+      },
+      needle,
+    );
+    el(
+      "line",
+      {
+        x1: 200,
+        y1: 330,
+        x2: 200,
+        y2: 30,
+        stroke: "#b0130a",
+        "stroke-width": 1.8,
+      },
+      needle,
+    );
+
+    /* ---------- S meter ---------- */
+    const sm = $("#smeter"),
+      SP = [100, 168],
+      S0 = -48,
+      S1 = 48;
+    el("rect", { width: 200, height: 140, fill: "#efe3c4" }, sm);
+    const sarc = (r, a0, a1, color, w) => {
+      const [x0, y0] = polar(...SP, r, a0),
+        [x1, y1] = polar(...SP, r, a1);
+      el(
+        "path",
+        {
+          d: `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`,
+          fill: "none",
+          stroke: color,
+          "stroke-width": w,
+        },
+        sm,
+      );
+    };
+    sarc(120, S0, 18, "#2a2620", 1.4);
+    sarc(120, 18, S1, "#b42318", 3.2);
+    ["1", "3", "5", "7", "9", "+20", "+40", "+60"].forEach((lab, i, all) => {
+      const a = S0 + ((S1 - S0) * i) / (all.length - 1);
+      const [x0, y0] = polar(...SP, 120, a),
+        [x1, y1] = polar(...SP, 110, a),
+        [tx, ty] = polar(...SP, 99, a);
+      el(
+        "line",
+        {
+          x1: x0,
+          y1: y0,
+          x2: x1,
+          y2: y1,
+          stroke: i > 4 ? "#b42318" : "#2a2620",
+          "stroke-width": 1.3,
+        },
+        sm,
+      );
+      const t = el(
+        "text",
+        {
+          x: tx,
+          y: ty,
+          "text-anchor": "middle",
+          "dominant-baseline": "middle",
+          "font-family": "Oswald, sans-serif",
+          "font-size": 10,
+          fill: i > 4 ? "#b42318" : "#2a2620",
+        },
+        sm,
+      );
+      t.textContent = lab;
+    });
+    const t2 = el(
+      "text",
+      {
+        x: 100,
+        y: 96,
+        "text-anchor": "middle",
+        "font-family": "Special Elite, monospace",
+        "font-size": 15,
+        fill: "#2a2620",
+      },
+      sm,
+    );
+    t2.textContent = "S";
+    const t3 = el(
+      "text",
+      {
+        x: 100,
+        y: 112,
+        "text-anchor": "middle",
+        "font-family": "Oswald, sans-serif",
+        "font-size": 7,
+        "letter-spacing": 1.5,
+        fill: "#5a4a3a",
+      },
+      sm,
+    );
+    t3.textContent = "SIGNAL STRENGTH";
+    const sNeedle = el("g", { class: "smeter-needle" }, sm);
+    el(
+      "line",
+      {
+        x1: 100,
+        y1: 168,
+        x2: 100,
+        y2: 46,
+        stroke: "#1d1a16",
+        "stroke-width": 1.5,
+      },
+      sNeedle,
+    );
+    el("rect", { x: 70, y: 126, width: 60, height: 20, fill: "#1a1512" }, sm);
+    el("circle", { cx: 100, cy: 136, r: 6, fill: "#2a2420" }, sm);
+
+    /* ---------- band spread ---------- */
+    const bd = $("#band"),
+      BP = [100, 190];
+    el("rect", { width: 200, height: 140, fill: "#efe3c4" }, bd);
+    for (const [r, n, labs, col] of [
+      [150, 20, ["0", "20", "40", "60", "80", "100"], "#2a2620"],
+      [122, 10, ["3.5", "7", "14", "21", "28", ""], "#b0130a"],
+    ]) {
+      const [x0, y0] = polar(...BP, r, -32),
+        [x1, y1] = polar(...BP, r, 32);
+      el(
+        "path",
+        {
+          d: `M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`,
+          fill: "none",
+          stroke: col,
+          "stroke-width": 1,
+        },
+        bd,
+      );
+      for (let i = 0; i <= n; i++) {
+        const a = -32 + (64 * i) / n,
+          big = i % (n / 5) === 0;
+        const [a0, b0] = polar(...BP, r, a),
+          [a1, b1] = polar(...BP, r - (big ? 9 : 5), a);
+        el(
+          "line",
+          {
+            x1: a0,
+            y1: b0,
+            x2: a1,
+            y2: b1,
+            stroke: col,
+            "stroke-width": big ? 1.2 : 0.6,
+          },
+          bd,
+        );
+        if (big) {
+          const [tx, ty] = polar(...BP, r - 17, a);
+          const t = el(
+            "text",
+            {
+              x: tx,
+              y: ty,
+              "text-anchor": "middle",
+              "dominant-baseline": "middle",
+              "font-family": "Oswald, sans-serif",
+              "font-size": 10,
+              fill: col,
+            },
+            bd,
+          );
+          t.textContent = labs[i / (n / 5)];
+        }
+      }
+    }
+    const t4 = el(
+      "text",
+      {
+        x: 100,
+        y: 128,
+        "text-anchor": "middle",
+        "font-family": "Oswald, sans-serif",
+        "font-size": 7,
+        "letter-spacing": 1.5,
+        fill: "#5a4a3a",
+      },
+      bd,
+    );
+    t4.textContent = "BAND SPREAD · KC";
+    const bNeedle = el(
+      "line",
+      {
+        x1: 100,
+        y1: 190,
+        x2: 100,
+        y2: 34,
+        stroke: "#b0130a",
+        "stroke-width": 1.4,
+        class: "needle",
+        style: "transform-origin:100px 190px",
+      },
+      bd,
+    );
+
+    /* ---------- aurora rift: strands of light that undulate ---------- */
+    // Each strand is a sine wave travelling up the rift (pinned at both ends), with a second
+    // harmonic and a breathing amplitude; SMIL morphs the path through one full cycle.
+    const wave = $("#wave");
+    const STRANDS = [
+      { color: "#6cffb8", w: 1, amp: 22, ph: 3.1, op: 0.45 },
+      { color: "#b49aff", w: 1.4, amp: 16, ph: -1.4, op: 0.6 },
+      { color: "#7fd0ff", w: 1.2, amp: 18, ph: 2.3, op: 0.6 },
+      { color: "#9fffe0", w: 1.8, amp: 13, ph: 1.1, op: 0.8 },
+      { color: "#ffffff", w: 2.8, amp: 8, ph: 0, op: 1 },
+    ];
+    const SEGMENTS = 48,
+      FRAMES = 16,
+      LAMBDA = 560;
+    const strandPath = ({ amp, ph }, t) => {
+      const breathe = 1 + 0.3 * Math.sin(t + ph);
+      let d = "";
+      for (let i = 0; i <= SEGMENTS; i++) {
+        const y = (i * 1000) / SEGMENTS;
+        const pin = Math.pow(Math.sin((Math.PI * i) / SEGMENTS), 0.6);
+        const k = (2 * Math.PI * y) / LAMBDA;
+        const x =
+          50 +
+          amp *
+            breathe *
+            pin *
+            (Math.sin(k + t + ph) + 0.12 * Math.sin(1.6 * k - 2 * t + ph));
+        d += `${i ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(1)}`;
+      }
+      return d;
+    };
+    STRANDS.forEach((s, n) => {
+      const path = el(
+        "path",
+        {
+          d: strandPath(s, 0),
+          fill: "none",
+          stroke: s.color,
+          "stroke-width": s.w,
+          opacity: s.op,
+          "stroke-linecap": "round",
+          "vector-effect": "non-scaling-stroke",
+        },
+        wave,
+      );
+      if (reduced) return;
+      const values = Array.from({ length: FRAMES + 1 }, (_, f) =>
+        strandPath(s, (2 * Math.PI * f) / FRAMES),
+      ).join(";");
+      el(
+        "animate",
+        {
+          attributeName: "d",
+          dur: `${6 + n * 0.7}s`,
+          values,
+          repeatCount: "indefinite",
+        },
+        path,
+      );
+    });
+
+    /* ---------- tuning knob scale ---------- */
+    const ts = $("#tunescale");
+    for (let i = 0; i < 50; i++) {
+      const a = i * 7.2,
+        big = i % 5 === 0;
+      const [x0, y0] = polar(50, 50, 48, a),
+        [x1, y1] = polar(50, 50, big ? 42 : 45, a);
+      el(
+        "line",
+        {
+          x1: x0,
+          y1: y0,
+          x2: x1,
+          y2: y1,
+          stroke: "#1c1e20",
+          "stroke-width": big ? 0.9 : 0.5,
+        },
+        ts,
+      );
+      if (big) {
+        const [tx, ty] = polar(50, 50, 37, a);
+        const t = el(
+          "text",
+          {
+            x: tx,
+            y: ty,
+            "text-anchor": "middle",
+            "dominant-baseline": "middle",
+            "font-family": "Oswald, sans-serif",
+            "font-size": 5,
+            fill: "#1c1e20",
+            transform: `rotate(${a} ${tx} ${ty})`,
+          },
+          ts,
+        );
+        t.textContent = i * 2;
+      }
+    }
+
+    /* ---------- presets ---------- */
+    const keys = $("#keys");
+    PRESETS.forEach(([freq, label, pos]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "key";
+      b.setAttribute("aria-pressed", "false");
+      b.innerHTML = `<b>${freq}</b><span>${label}</span>`;
+      b.addEventListener("click", () => pickPreset(b, label, pos, freq));
+      keys.appendChild(b);
+    });
+
+    /* ---------- sound (Web Audio, synthesized; only after a click) ---------- */
+    let soundOn = true,
+      ac = null;
+    const audio = () => {
+      if (!soundOn) return null;
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === "suspended") ac.resume();
+      return ac;
+    };
+    const noise = (ctx, secs) => {
+      const b = ctx.createBuffer(1, ctx.sampleRate * secs, ctx.sampleRate),
+        d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const s = ctx.createBufferSource();
+      s.buffer = b;
+      return s;
+    };
+    const sfx = {
+      powerOn() {
+        const c = audio();
+        if (!c) return;
+        const t = c.currentTime,
+          g = c.createGain();
+        g.connect(c.destination);
+        for (const f of [60, 120, 180]) {
+          const o = c.createOscillator();
+          o.frequency.value = f;
+          const og = c.createGain();
+          og.gain.value = f === 60 ? 0.5 : 0.18;
+          o.connect(og).connect(g);
+          o.start(t);
+          o.stop(t + 3);
+        }
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.06, t + 1.2);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + 3);
+        const n = noise(c, 3.6),
+          bp = c.createBiquadFilter(),
+          ng = c.createGain();
+        bp.type = "bandpass";
+        bp.Q.value = 3;
+        bp.frequency.setValueAtTime(700, t);
+        bp.frequency.exponentialRampToValueAtTime(2400, t + 1.6);
+        bp.frequency.exponentialRampToValueAtTime(1300, t + 3.4);
+        ng.gain.setValueAtTime(0, t);
+        ng.gain.linearRampToValueAtTime(0.12, t + 0.5);
+        ng.gain.linearRampToValueAtTime(0.08, t + 2.8);
+        ng.gain.linearRampToValueAtTime(0, t + 3.6);
+        n.connect(bp).connect(ng).connect(c.destination);
+        n.start(t);
+        const w = c.createOscillator(),
+          wg = c.createGain();
+        w.frequency.setValueAtTime(2600, t + 0.4);
+        w.frequency.exponentialRampToValueAtTime(420, t + 2.6);
+        wg.gain.setValueAtTime(0, t + 0.4);
+        wg.gain.linearRampToValueAtTime(0.025, t + 0.8);
+        wg.gain.linearRampToValueAtTime(0, t + 2.7);
+        w.connect(wg).connect(c.destination);
+        w.start(t + 0.4);
+        w.stop(t + 2.8);
+        const b = c.createOscillator(),
+          bg = c.createGain();
+        b.frequency.value = 1000;
+        bg.gain.setValueAtTime(0, t + 3);
+        bg.gain.linearRampToValueAtTime(0.05, t + 3.01);
+        bg.gain.linearRampToValueAtTime(0, t + 3.12);
+        b.connect(bg).connect(c.destination);
+        b.start(t + 3);
+        b.stop(t + 3.2);
+      },
+      powerOff() {
+        const c = audio();
+        if (!c) return;
+        const t = c.currentTime;
+        const n = noise(c, 0.5),
+          hp = c.createBiquadFilter(),
+          ng = c.createGain();
+        hp.type = "highpass";
+        hp.frequency.value = 1500;
+        ng.gain.setValueAtTime(0.16, t);
+        ng.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        n.connect(hp).connect(ng).connect(c.destination);
+        n.start(t);
+        const k = c.createOscillator(),
+          kg = c.createGain();
+        k.frequency.value = 110;
+        kg.gain.setValueAtTime(0.2, t);
+        kg.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        k.connect(kg).connect(c.destination);
+        k.start(t);
+        k.stop(t + 0.1);
+        const h = c.createOscillator(),
+          hg = c.createGain();
+        h.frequency.setValueAtTime(120, t);
+        h.frequency.exponentialRampToValueAtTime(40, t + 1.8);
+        hg.gain.setValueAtTime(0.05, t);
+        hg.gain.exponentialRampToValueAtTime(0.0005, t + 1.9);
+        h.connect(hg).connect(c.destination);
+        h.start(t);
+        h.stop(t + 2);
+      },
+      key() {
+        const c = audio();
+        if (!c) return;
+        const t = c.currentTime,
+          n = noise(c, 0.04),
+          g = c.createGain();
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+        n.connect(g).connect(c.destination);
+        n.start(t);
+      },
+    };
+
+    /* ---------- power: valve warm-up / cool-down ---------- */
+    const rig = $("#rig"),
+      mic = $("#mic");
+    let power = 0,
+      lamp = 0,
+      tally = 0,
+      anim = null;
+    const apply = () => {
+      rig.style.setProperty("--power", power.toFixed(3));
+      rig.style.setProperty("--lamp", lamp.toFixed(3));
+      mic.style.setProperty("--tally", tally.toFixed(3));
+    };
+    // to: target power; lampTo / tallyTo: targets; dur in ms; warm = valve curve with flicker on the way up
+    const ramp = (to, lampTo, tallyTo, dur, warm) =>
+      new Promise((done) => {
+        cancelAnimationFrame(anim);
+        const p0 = power,
+          l0 = lamp,
+          m0 = tally,
+          start = performance.now();
+        if (reduced) {
+          power = to;
+          lamp = lampTo;
+          tally = tallyTo;
+          apply();
+          return done();
+        }
+        const step = (now) => {
+          const k = Math.min(1, (now - start) / dur);
+          const curve = warm
+            ? 1 - Math.pow(1 - k, 3)
+            : 1 - Math.exp(-5 * k) * (1 - k); // filament heats slow-fast; cools exponentially
+          const flick =
+            k < 0.35 && Math.random() < 0.25
+              ? (warm ? -0.25 : 0.18) * (1 - k)
+              : 0;
+          power = Math.max(0, p0 + (to - p0) * curve + flick);
+          lamp = Math.max(
+            0,
+            l0 +
+              (lampTo - l0) *
+                (warm
+                  ? k < 0.15
+                    ? Math.random() < 0.5
+                      ? 0.9
+                      : 0.1
+                    : curve
+                  : curve),
+          );
+          tally = m0 + (tallyTo - m0) * curve;
+          apply();
+          if (k < 1) anim = requestAnimationFrame(step);
+          else {
+            power = to;
+            lamp = lampTo;
+            tally = tallyTo;
+            apply();
+            done();
+          }
+        };
+        anim = requestAnimationFrame(step);
+      });
+
+    /* ---------- needles ---------- */
+    let pos = 44,
+      sAngle = S0,
+      sTarget = S0;
+    const setPos = (p) => {
+      pos = p;
+      // CSS transforms (not the SVG attribute) so the needles spring like the knob
+      needle.style.transform = `rotate(${A0 + ((A1 - A0) * p) / 100}deg)`;
+      bNeedle.style.transform = `rotate(${-28 + ((p * 7.3) % 56)}deg)`;
+      $("#tune").style.setProperty("--turn", `${p * 3.2}deg`);
+    };
+    bNeedle.style.transition = "transform .7s cubic-bezier(.4,1.3,.6,1)";
+    // the S meter swings with the signal: low drift on standby, S5–S9 on air, peaks while the operator talks
+    let talking = 0;
+    const meter = () => {
+      const on = body.classList.contains("onair");
+      if (Math.random() < 0.08)
+        sTarget =
+          S0 +
+          (S1 - S0) *
+            power *
+            (on
+              ? 0.45 + Math.random() * 0.35 + talking * 0.2
+              : 0.05 + Math.random() * 0.08);
+      sAngle += (sTarget - sAngle) * 0.12;
+      sNeedle.setAttribute("transform", `rotate(${sAngle} 100 168)`);
+      talking = Math.max(0, talking - 0.01);
+      requestAnimationFrame(meter);
+    };
+    requestAnimationFrame(meter);
+
+    /* ---------- QSO flow ---------- */
+    let timers = [],
+      clock = null,
+      elapsed = 0,
+      state = "home",
+      topic = "",
+      station = STATIONS[0],
+      freq = "14.205";
+    const later = (ms, fn) =>
+      timers.push(setTimeout(fn, reduced ? Math.min(ms, 50) : ms));
+    const fmt = (s) =>
+      `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+    const setStatus = (t) => {
+      $("#q-status").textContent = t;
+    };
+    const lines = $("#lines");
+
+    const typeOut = (node, text) =>
+      new Promise((done) => {
+        if (reduced) {
+          node.textContent = text;
+          return done();
+        }
+        const caret = document.createElement("span");
+        caret.className = "caret";
+        let i = 0;
+        node.textContent = "";
+        node.appendChild(caret);
+        const tick = () => {
+          i += 1 + (Math.random() < 0.3 ? 1 : 0);
+          node.textContent = text.slice(0, i);
+          node.appendChild(caret);
+          talking = 1;
+          if (i < text.length)
+            timers.push(setTimeout(tick, 28 + Math.random() * 30));
+          else {
+            caret.remove();
+            done();
+          }
+        };
+        tick();
+      });
+
+    const addLine = ([who, text, kind, better]) => {
+      const li = document.createElement("li");
+      li.className = `line ${who}`;
+      li.innerHTML = `<span class="who">${who === "op" ? station[0] : "VOS"}</span><span class="text"></span>`;
+      lines.appendChild(li);
+      const t = li.querySelector(".text");
+      if (who === "op") {
+        setStatus("Recibiendo…");
+        typeOut(t, text).then(() => setStatus("Recibiendo · tu turno"));
+      } else {
+        t.textContent = text;
+        setStatus("Transmitiendo…");
+        if (kind) {
+          const n = document.createElement("span");
+          n.className = `note${kind === "ok" ? " ok" : ""}`;
+          n.textContent =
+            kind === "ok"
+              ? "✓ Copiado 5 y 9: bien dicho"
+              : `✎ Mejor: ${better}`;
+          li.appendChild(n);
+        }
+      }
+      lines.scrollTop = lines.scrollHeight;
+    };
+
+    const startCall = async () => {
+      if (state !== "home") return;
+      topic = $("#topic").value.trim();
+      if (!topic) {
+        const r = $("#tuner");
+        r.classList.remove("shake");
+        void r.offsetWidth;
+        r.classList.add("shake");
+        $("#topic").focus();
+        return;
+      }
+      state = "opening";
+      const h = hash(topic.toLowerCase());
+      if (!keys.querySelector('[aria-pressed="true"]')) {
+        setPos(4 + (h % 92));
+        freq = (3.5 + ((h % 92) / 100) * 26).toFixed(3);
+      }
+      station = STATIONS[h % STATIONS.length];
+      $("#q-call").textContent = station[0];
+      $("#sl-call").textContent = station[0];
+      $("#q-place").textContent = `${station[1]} · operador IA · ${freq} MHz`;
+      $("#sl-freq").textContent = `${freq} MHz`;
+      lines.innerHTML = "";
+      elapsed = 0;
+      $("#q-clock").textContent = $("#sl-clock").textContent = "00:00";
+      setStatus("Sintonizando…");
+      mic.classList.add("pressed");
+      mic.setAttribute("aria-label", "Cortar");
+      $("#mic-caption").textContent = "PTT · CORTAR";
+      sfx.powerOn();
+      body.classList.add("onair");
+      $("#lampstate").textContent = "ON";
+      ramp(1, 1, 1, 1500, true);
+      later(250, () => body.classList.add("rift-on"));
+      later(520, () => {
+        body.classList.add("split-open", "oncall");
+      });
+      later(1300, () => {
+        state = "call";
+        clock = setInterval(() => {
+          elapsed++;
+          $("#q-clock").textContent = $("#sl-clock").textContent = fmt(elapsed);
+        }, 1000);
+        script(topic, station[0]).forEach((line, i) =>
+          later(3000 + i * 3000 - 1300, () => addLine(line)),
+        );
+      });
+    };
+
+    const hangUp = async () => {
+      if (state !== "call" && state !== "opening") return;
+      state = "closing";
+      timers.forEach(clearTimeout);
+      timers = [];
+      clearInterval(clock);
+      setStatus("73 · cerrando…");
+      mic.classList.remove("pressed");
+      sfx.powerOff();
+      $("#lampstate").textContent = "OFF";
+      ramp(0, 0, 0, 2000, false);
+      later(400, () => {
+        body.classList.remove("rift-on");
+        body.classList.add("rift-closing");
+      });
+      later(700, () => body.classList.remove("split-open", "onair"));
+      later(2300, () => {
+        body.classList.remove("rift-closing", "oncall");
+        showReport();
+      });
+    };
+
+    const showReport = () => {
+      state = "report";
+      body.classList.add("on-report");
+      const fixes = [...lines.querySelectorAll(".note")].filter(
+          (n) => !n.classList.contains("ok"),
+        ).length,
+        total = lines.querySelectorAll(".line.you").length;
+      $("#fields").innerHTML = [
+        ["A", station[0]],
+        ["DE", "Vos"],
+        ["DESDE", station[1]],
+        ["FRECUENCIA", `${freq} MHz`],
+        ["DURACIÓN", fmt(elapsed)],
+        ["CORRECCIONES", `${fixes} de ${total}`],
+      ]
+        .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`)
+        .join("");
+      scrollTo({ top: 0 });
+      $("#again").focus();
+    };
+
+    const newQso = () => {
+      body.classList.remove("on-report");
+      state = "home";
+      $("#topic").value = "";
+      keys
+        .querySelectorAll(".key")
+        .forEach((k) => k.setAttribute("aria-pressed", "false"));
+      mic.setAttribute("aria-label", "Llamar");
+      $("#mic-caption").textContent = "PTT · LLAMAR";
+      setPos(44);
+      sfx.key();
+      ramp(0.45, 0, 0, 1800, true);
+    };
+
+    const pickPreset = (btn, label, p, f) => {
+      if (state !== "home") return;
+      sfx.key();
+      keys
+        .querySelectorAll(".key")
+        .forEach((k) => k.setAttribute("aria-pressed", String(k === btn)));
+      $("#topic").value = label;
+      freq = f;
+      setPos(p);
+      later(750, startCall);
+    };
+
+    $("#tuner").addEventListener("submit", (e) => {
+      e.preventDefault();
+      startCall();
+    });
+    $("#topic").addEventListener("input", () =>
+      keys
+        .querySelectorAll(".key")
+        .forEach((k) => k.setAttribute("aria-pressed", "false")),
+    );
+    mic.addEventListener("click", () =>
+      state === "home" ? startCall() : hangUp(),
+    );
+    $("#again").addEventListener("click", newQso);
+    $("#pdf").addEventListener("click", () => {
+      $("#pdf-note").hidden = false;
+    });
+    $("#sound").addEventListener("click", (e) => {
+      soundOn = !soundOn;
+      e.currentTarget.setAttribute("aria-pressed", String(soundOn));
+      $("#snd-state").textContent = soundOn ? "ON" : "OFF";
+    });
+
+    /* first light: the set warms up to standby on load */
+    setPos(44);
+    apply();
+    setTimeout(() => ramp(0.45, 0, 0, 2200, true), 400);
+  })();
+</script>

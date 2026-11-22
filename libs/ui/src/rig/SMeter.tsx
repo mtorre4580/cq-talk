@@ -1,70 +1,76 @@
 import { useI18n } from '@cq-talk/i18n';
+import { S_METER, arcPath, scaleTicks } from './dial';
+import { ScaleMarks } from './ScaleMarks';
+
+const INK = '#2a2620';
+const RED = '#b42318';
+const { center, from, to } = S_METER;
+const MARKS = scaleTicks({
+  center,
+  radius: 120,
+  from,
+  to,
+  count: 7,
+  majorEvery: 1,
+  length: 10,
+  majorLength: 10,
+  labels: ['1', '3', '5', '7', '9', '+20', '+40', '+60'],
+  labelRadius: 99,
+});
 
 export interface SMeterProps {
-  /** The needle swings and the face glows while a signal is on air */
+  /** The needle swings S5–S9 while a signal is on air and drifts low on standby */
   active: boolean;
 }
 
-const SCALE = [
-  { x: 26, y: 80, label: '1' },
-  { x: 44, y: 50, label: '3' },
-  { x: 70, y: 30, label: '5' },
-  { x: 100, y: 24, label: '7' },
-  { x: 127, y: 30, label: '9' },
-];
-
-/** Cream S meter in S units with a red +20 zone. */
+/** Cream S meter in S units with a red zone past S9. */
 export const SMeter = ({ active }: SMeterProps) => {
   const { t } = useI18n();
   return (
-    <div
-      className="flex flex-[1_1_170px] items-center justify-center rounded-lg border-[3px] border-plate bg-meter p-1.5"
-      style={{
-        boxShadow: `0 0 22px ${active ? 'rgba(255,190,90,.55)' : 'rgba(255,190,90,.15)'} inset`,
-      }}
-    >
-      <svg role="img" aria-label={t('rig.meter')} viewBox="0 0 180 110" width="180" height="110">
-        <path d="M24 92 A70 70 0 0 1 156 92" fill="none" stroke="#2A2620" strokeWidth="2" />
-        <path d="M124 35 A70 70 0 0 1 156 92" fill="none" stroke="#B42318" strokeWidth="5" />
-        <g fontFamily="Oswald, sans-serif" fontSize="11" fill="#2A2620" textAnchor="middle">
-          {SCALE.map((mark) => (
-            <text key={mark.label} x={mark.x} y={mark.y}>
-              {mark.label}
-            </text>
-          ))}
-          <text x="156" y="62" fill="#B42318">
-            +20
-          </text>
-        </g>
-        <text
-          x="90"
-          y="74"
-          fontFamily="Oswald, sans-serif"
-          fontSize="11"
-          letterSpacing="2"
-          fill="#5A5246"
-          textAnchor="middle"
-        >
-          {t('rig.meterUnits')}
-        </text>
-        <line
-          data-testid="s-meter-needle"
-          x1="90"
-          y1="92"
-          x2="90"
-          y2="26"
-          stroke="#1A1814"
-          strokeWidth="2"
-          strokeLinecap="round"
-          style={{
-            transformOrigin: '90px 92px',
-            transformBox: 'view-box',
-            transform: 'rotate(-40deg)',
-            animation: active ? 'cq-vu 1.2s ease-in-out infinite alternate' : 'none',
-          }}
-        />
-        <circle cx="90" cy="92" r="6" fill="#1A1814" />
-      </svg>
-    </div>
+    <svg role="img" aria-label={t('rig.meter')} viewBox="0 0 200 140">
+      <rect width="200" height="140" fill="#efe3c4" />
+      <path d={arcPath(center, 120, from, 18)} fill="none" stroke={INK} strokeWidth="1.4" />
+      <path d={arcPath(center, 120, 18, to)} fill="none" stroke={RED} strokeWidth="3.2" />
+      <ScaleMarks ticks={MARKS} color={(i) => (i > 4 ? RED : INK)} fontSize={10} />
+      <text
+        x="100"
+        y="96"
+        textAnchor="middle"
+        fontFamily="Special Elite, monospace"
+        fontSize="15"
+        fill={INK}
+      >
+        S
+      </text>
+      <text
+        x="100"
+        y="112"
+        textAnchor="middle"
+        fontFamily="Oswald, sans-serif"
+        fontSize="7"
+        letterSpacing="1.5"
+        fill="#5a4a3a"
+      >
+        {t('rig.signal')}
+      </text>
+      <line
+        data-testid="s-meter-needle"
+        x1="100"
+        y1="168"
+        x2="100"
+        y2="46"
+        stroke="#1d1a16"
+        strokeWidth="1.5"
+        style={{
+          transformOrigin: '100px 168px',
+          transformBox: 'view-box',
+          animation: active
+            ? 'cq-smeter-air 1.4s ease-in-out infinite alternate'
+            : 'cq-smeter-idle 5s ease-in-out infinite',
+        }}
+      />
+      <rect x="70" y="126" width="60" height="20" fill="#1a1512" />
+      <circle cx="100" cy="136" r="6" fill="#2a2420" />
+    </svg>
   );
 };

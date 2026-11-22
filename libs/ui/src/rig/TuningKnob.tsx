@@ -1,31 +1,48 @@
+import type { CSSProperties } from 'react';
+import { knobTurn, scaleTicks } from './dial';
+import { ScaleMarks } from './ScaleMarks';
+
+const SCALE = scaleTicks({
+  center: [50, 50],
+  radius: 48,
+  from: 0,
+  to: 352.8,
+  count: 49,
+  majorEvery: 5,
+  length: 3,
+  majorLength: 6,
+  labels: Array.from({ length: 10 }, (_, i) => String(i * 10)),
+  labelRadius: 37,
+});
+
 export interface TuningKnobProps {
   /** Same 0–100 position as the dial needle; the knob turns 3.2° per step */
   position: number;
 }
 
-/** Knurled tuning knob that turns together with the dial needle. */
+/** Chrome flywheel tuning knob with a satin logging scale and a three-spoke bakelite spinner. */
 export const TuningKnob = ({ position }: TuningKnobProps) => (
-  <svg aria-hidden="true" viewBox="0 0 80 80" width="64" height="64" className="shrink-0">
-    <g
-      data-testid="tuning-knob"
-      style={{
-        transformOrigin: '40px 40px',
-        transformBox: 'view-box',
-        transition: 'transform .7s var(--ease-spring)',
-        transform: `rotate(${Math.round(position * 3.2)}deg)`,
-      }}
-    >
-      <circle
-        cx="40"
-        cy="40"
-        r="34"
-        fill="#C9CCC4"
-        stroke="#7E837D"
-        strokeWidth="7"
-        strokeDasharray="2 3"
-      />
-      <circle cx="40" cy="40" r="22" fill="#2A2E2B" />
-      <rect x="38" y="20" width="4" height="14" rx="2" fill="#E8E4D8" />
-    </g>
-  </svg>
+  <div
+    aria-hidden="true"
+    data-testid="tuning-knob"
+    className="cq-tune"
+    style={{ '--turn': `${knobTurn(position)}deg` } as CSSProperties}
+  >
+    <div className="cq-tune-ring" />
+    <div className="cq-tune-dial">
+      <svg viewBox="0 0 100 100">
+        <ScaleMarks
+          ticks={SCALE}
+          color="#1c1e20"
+          fontSize={5}
+          rotateLabels
+          majorWidth={0.9}
+          minorWidth={0.5}
+        />
+      </svg>
+    </div>
+    <div className="cq-tune-spinner" />
+    <div className="cq-tune-gloss" />
+    <span className="cq-tune-index" />
+  </div>
 );

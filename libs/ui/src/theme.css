@@ -1,5 +1,6 @@
 /*
- * CQ talk design tokens. Every value comes from docs/prototype/Main.dc.html.
+ * CQ talk design tokens. Values come from docs/prototype/index.html (v2) and, for the screens
+ * it did not change (QSL card, logbook), from docs/prototype/v1/Main.dc.html.
  * Import after `@import 'tailwindcss'` so these tokens replace Tailwind's defaults.
  */
 
@@ -12,6 +13,9 @@
 @import '@fontsource/share-tech-mono/latin-400.css';
 @import '@fontsource/special-elite/latin-400.css';
 
+/* The realistic receiver, desk microphone and split call stage (docs/prototype/index.html) */
+@import './rig/rig.css';
+
 @theme {
   /* Only our palette: no stray Tailwind colors */
   --color-*: initial;
@@ -22,6 +26,7 @@
   --color-night-text: #e8e4d8;
   --color-night-muted: #b8c4be;
   --color-night-label: #e8ece8;
+  --color-night-dim: #9fa9a4;
   --color-link: #9fe8c8;
   --color-link-hover: #d2ffea;
 
@@ -53,6 +58,11 @@
   --color-amber-ink: #2a1606;
   --color-needle: #b0130a;
   --color-freq-ink: #6b3a0c;
+  --color-amber-soft: #e9b25f;
+
+  /* The QSO as light on the night (call screen) */
+  --color-operator-light: #ffcf94;
+  --color-ok-light: #86d9a6;
 
   /* Display (topic input, station panel) */
   --color-display: #120d08;
@@ -99,6 +109,7 @@
   --animate-lamp: lamp 1.6s ease-in-out infinite;
   --animate-fadein: fadein 0.5s ease-out;
   --ease-spring: cubic-bezier(0.4, 1.3, 0.6, 1);
+  --ease-split: cubic-bezier(0.7, 0, 0.2, 1);
 
   @keyframes twinkle {
     0%,

@@ -26,7 +26,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "prototype:render": "node tools/prototype/render.mjs",
     "check:bundle": "tsx tools/bundle/check-bundle.ts",
     "lhci": "lhci autorun"
   },

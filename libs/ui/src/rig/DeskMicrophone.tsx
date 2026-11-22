@@ -5,104 +5,120 @@ export type MicState = 'off' | 'on' | 'closing';
 
 export interface DeskMicrophoneProps {
   state: MicState;
-  /** Tapping the live microphone ends the QSO */
+  /** Pressing the switched-off microphone calls CQ */
+  onCall: () => void;
+  /** Pressing the live microphone ends the QSO */
   onHangUp: () => void;
 }
 
-const GRILLE = [
-  [100, 86],
-  [88, 86],
-  [112, 86],
-  [76, 86],
-  [124, 86],
-  [94, 75],
-  [106, 75],
-  [82, 75],
-  [118, 75],
-  [94, 97],
-  [106, 97],
-  [82, 97],
-  [118, 97],
-  [100, 64],
-  [88, 64],
-  [112, 64],
-  [100, 108],
-  [88, 108],
-  [112, 108],
-] as const;
-
-/** Chrome desk microphone: grille lights up amber, the PTT bar turns red and the LED goes green when live. */
-export const DeskMicrophone = ({ state, onHangUp }: DeskMicrophoneProps) => {
+/**
+ * Black desk microphone on a chrome stand, like the ones on 1960s ham desks. Pressing it calls
+ * (the push-to-talk bar sinks and the tally lights); pressing it again hangs up.
+ */
+export const DeskMicrophone = ({ state, onCall, onHangUp }: DeskMicrophoneProps) => {
   const { t } = useI18n();
   const on = state === 'on';
-  const label = on ? t('mic.on') : state === 'closing' ? t('mic.closing') : t('mic.off');
-  const hint = on ? t('mic.hintOn') : state === 'closing' ? t('mic.hintClosing') : t('mic.hintOff');
+  const caption = on ? t('mic.on') : state === 'closing' ? t('mic.closing') : t('mic.off');
 
   return (
-    <div className="flex max-w-[240px] flex-[1_1_200px] flex-col items-center gap-2.5">
+    <div className="cq-mic-stand">
       <button
         type="button"
+        className="cq-mic"
+        data-state={state}
         aria-label={on ? t('mic.labelOn') : t('mic.labelOff')}
+        aria-disabled={state === 'closing' || undefined}
         onClick={() => {
           if (on) onHangUp();
+          else if (state === 'off') onCall();
         }}
-        className="group cursor-pointer border-0 bg-transparent p-0"
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 200 300"
-          width="180"
-          height="270"
-          className="group-hover:brightness-[1.08]"
-        >
-          <circle
-            cx="100"
-            cy="86"
-            r="70"
-            fill="none"
-            stroke={on ? 'rgba(110,255,190,.55)' : 'rgba(110,255,190,0)'}
-            strokeWidth="10"
-            style={{ transition: 'stroke 1s ease' }}
-          />
-          <circle cx="100" cy="86" r="60" fill="#C9CCC4" stroke="#7E837D" strokeWidth="4" />
-          <circle cx="100" cy="86" r="48" fill="#2A2E2B" />
-          <g
-            data-testid="mic-grille"
-            fill={on ? '#FFB347' : '#5A5F5B'}
-            style={{ transition: 'fill .6s ease' }}
-          >
-            {GRILLE.map(([cx, cy]) => (
-              <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="3" />
-            ))}
-          </g>
-          <rect x="92" y="144" width="16" height="96" rx="4" fill="#9EA39C" />
-          <path
-            d="M30 262 Q34 236 70 234 L130 234 Q166 236 170 262 Z"
-            fill="#46564F"
-            stroke="#2A322E"
-            strokeWidth="2"
-          />
-          <rect x="26" y="260" width="148" height="22" rx="8" fill="#2E3833" />
+        <svg aria-hidden="true" viewBox="0 0 120 270">
+          <defs>
+            <linearGradient id="cq-mic-chrome" x1="0" x2="1">
+              <stop offset="0" stopColor="#5b6167" />
+              <stop offset=".35" stopColor="#fbfcfc" />
+              <stop offset=".6" stopColor="#9aa1a7" />
+              <stop offset="1" stopColor="#3b4046" />
+            </linearGradient>
+            <linearGradient id="cq-mic-chrome-v" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#f4f6f7" />
+              <stop offset=".5" stopColor="#8d949a" />
+              <stop offset="1" stopColor="#3b4046" />
+            </linearGradient>
+            <linearGradient id="cq-mic-base" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#4a4f4c" />
+              <stop offset=".25" stopColor="#2a2d2b" />
+              <stop offset="1" stopColor="#0d0e0d" />
+            </linearGradient>
+            <linearGradient id="cq-mic-head" x1="0" x2="1">
+              <stop offset="0" stopColor="#0a0a0a" />
+              <stop offset=".3" stopColor="#2d2d2d" />
+              <stop offset=".55" stopColor="#141414" />
+              <stop offset="1" stopColor="#050505" />
+            </linearGradient>
+            <pattern id="cq-mic-holes" width="5" height="5" patternUnits="userSpaceOnUse">
+              <rect width="5" height="5" fill="#262626" />
+              <circle cx="2.5" cy="2.5" r="1.25" fill="#050505" />
+            </pattern>
+            <radialGradient id="cq-mic-tally">
+              <stop offset="0" stopColor="#fff1e6" />
+              <stop offset=".35" stopColor="#ff5a3a" />
+              <stop offset="1" stopColor="#ff2a10" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* head */}
           <rect
-            x="62"
-            y="246"
-            width="76"
-            height="10"
-            rx="4"
-            fill={on ? '#FF4A2E' : '#6E716B'}
-            style={{ transition: 'fill .4s ease' }}
+            x="30"
+            y="14"
+            width="60"
+            height="112"
+            rx="14"
+            fill="url(#cq-mic-head)"
+            stroke="url(#cq-mic-chrome)"
+            strokeWidth="3"
           />
+          <rect x="38" y="24" width="44" height="92" rx="8" fill="url(#cq-mic-holes)" />
+          <rect className="cq-mic-glint" x="40" y="22" width="7" height="96" rx="3.5" fill="#fff" />
+          {/* yoke and stem */}
+          <path
+            d="M24 74 Q24 140 60 140 Q96 140 96 74"
+            fill="none"
+            stroke="url(#cq-mic-chrome)"
+            strokeWidth="5"
+          />
+          <circle cx="24" cy="74" r="5" fill="url(#cq-mic-chrome)" />
+          <circle cx="96" cy="74" r="5" fill="url(#cq-mic-chrome)" />
+          <rect x="55" y="138" width="10" height="78" fill="url(#cq-mic-chrome)" />
+          {/* base, push-to-talk bar and tally */}
+          <path
+            d="M10 262 L22 214 Q24 206 34 206 L86 206 Q96 206 98 214 L110 262 Z"
+            fill="url(#cq-mic-base)"
+          />
+          <path d="M10 262 L110 262" stroke="#000" strokeWidth="3" />
+          <path
+            d="M22 214 Q24 206 34 206 L86 206 Q96 206 98 214"
+            fill="none"
+            stroke="rgba(255,255,255,.25)"
+            strokeWidth="1.5"
+          />
+          <g className="cq-mic-ptt">
+            <rect
+              x="28"
+              y="222"
+              width="64"
+              height="9"
+              rx="4"
+              fill="url(#cq-mic-chrome-v)"
+              stroke="#202326"
+              strokeWidth="1"
+            />
+          </g>
+          <circle cx="60" cy="248" r="4.2" fill="#3a0f0a" stroke="#9aa0a4" strokeWidth="1.2" />
+          <circle className="cq-mic-tally" cx="60" cy="248" r="10" fill="url(#cq-mic-tally)" />
         </svg>
       </button>
-      <div className="flex items-center gap-2 font-label text-[13px] tracking-[2px] text-night-label">
-        <span
-          aria-hidden="true"
-          className={`size-2.5 rounded-full ${on ? 'bg-led-on' : 'bg-led-off'}`}
-          style={{ boxShadow: on ? '0 0 10px rgba(108,255,184,.9)' : 'none' }}
-        />
-        {label}
-      </div>
-      <span className="text-center text-[13px] text-night-muted">{hint}</span>
+      <span className="cq-mic-caption">{caption}</span>
     </div>
   );
 };

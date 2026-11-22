@@ -24,7 +24,8 @@ test('the production build ships a strict Content Security Policy and never trip
     .getByRole('button', { name: /Mundial 2026|World Cup 2026|Copa do Mundo 2026/ })
     .click();
   await expect(page.getByRole('status')).toBeVisible();
-  await page.locator('button[aria-label]').first().click();
+  // Hang up from the desk microphone (its name depends on the browser's language)
+  await page.locator('.cq-mic').click();
   await expect(page.getByRole('article')).toBeVisible({ timeout: 5000 });
   expect(violations).toEqual([]);
 });

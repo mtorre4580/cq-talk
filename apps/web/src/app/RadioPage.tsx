@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRadioSfx } from '@cq-talk/audio';
-import { ConversationLog, StationPanel, TransmitPanel } from '@cq-talk/call';
+import { ConversationLog, StationHeader, StationReadout, TransmitPanel } from '@cq-talk/call';
 import { DEFAULT_MODEL } from '@cq-talk/claude';
 import { useI18n } from '@cq-talk/i18n';
 import {
@@ -20,16 +20,8 @@ import {
   createSpeechOutput,
 } from '@cq-talk/speech';
 import { useSettings } from '@cq-talk/storage';
-import { TunerPanel } from '@cq-talk/tuner';
-import {
-  DeskMicrophone,
-  MeterBridge,
-  Rig,
-  RigCase,
-  SMeter,
-  TopPlate,
-  TuningDial,
-} from '@cq-talk/ui';
+import { TopicForm, WeeklyKeys } from '@cq-talk/tuner';
+import { DeskMicrophone, Receiver, Rig, SplitStage } from '@cq-talk/ui';
 import { Layout } from './Layout';
 import { logbook } from './logbook';
 import { useLiveOperator } from './useLiveOperator';
@@ -125,42 +117,73 @@ export const RadioPage = () => {
     speaking: voicePending,
   });
 
+  const call = state.screen === 'call';
+  const mic = micState(state);
+  // The microphone is the push-to-talk: pressed at home it calls on the typed topic
+  const callFromMic = () => {
+    if (state.query.trim()) qso.call(state.query);
+    else document.getElementById('topic')?.focus();
+  };
+
+  if (state.screen === 'report') {
+    return (
+      <Layout glow={skyGlow(state)}>
+        <Report state={state} onNewQso={qso.restart} />
+      </Layout>
+    );
+  }
+
   return (
-    <Layout glow={skyGlow(state)}>
-      {state.screen !== 'report' && (
-        <Rig
-          radio={
-            <RigCase onAir={onAir}>
-              <TopPlate onAir={onAir} soundOn={sound.soundOn} onToggleSound={sound.toggleSound} />
-              <MeterBridge>
-                <SMeter active={onAir} />
-                <TuningDial
-                  position={state.position}
-                  readout={
-                    state.screen === 'call'
-                      ? `${state.freq} · ${state.station.call}`
-                      : t('rig.worldBand')
-                  }
-                  active={onAir}
-                />
-              </MeterBridge>
-              {state.screen === 'home' && (
-                <TunerPanel
-                  query={state.query}
-                  position={state.position}
-                  onQueryChange={qso.setQuery}
-                  onCall={qso.call}
-                  onPreset={qso.pickPreset}
-                />
-              )}
-              {state.screen === 'call' && (
-                <StationPanel
-                  station={state.station}
-                  elapsed={state.elapsed}
-                  status={callStatus(state)}
-                />
-              )}
-              {state.screen === 'call' && state.mode === 'live' && !state.closing && (
+    <Layout glow={skyGlow(state)} wide>
+      <SplitStage
+        split={call && !state.closing}
+        rift={onAir ? 'on' : call ? 'closing' : 'off'}
+        call={call}
+        left={
+          <Rig
+            power={mic}
+            radio={
+              <Receiver
+                position={state.position}
+                readout={call ? `${state.freq} · ${state.station.call}` : t('rig.worldBand')}
+                onAir={onAir}
+                soundOn={sound.soundOn}
+                onToggleSound={sound.toggleSound}
+                display={
+                  call ? (
+                    <StationReadout
+                      call={state.station.call}
+                      freq={state.freq}
+                      elapsed={state.elapsed}
+                    />
+                  ) : (
+                    <TopicForm query={state.query} onQueryChange={qso.setQuery} onCall={qso.call} />
+                  )
+                }
+                bay={call ? undefined : <WeeklyKeys onPreset={qso.pickPreset} />}
+              />
+            }
+            microphone={
+              <DeskMicrophone
+                state={mic}
+                onCall={callFromMic}
+                onHangUp={() => qso.hangUp(live.finish())}
+              />
+            }
+          />
+        }
+        right={
+          call && (
+            <div className="cq-qso">
+              <StationHeader
+                station={state.station}
+                freq={state.freq}
+                elapsed={state.elapsed}
+                status={callStatus(state)}
+              />
+              <div aria-hidden="true" className="cq-rule" />
+              <ConversationLog entries={log} call={state.station.call} />
+              {state.mode === 'live' && !state.closing && (
                 <TransmitPanel
                   yourTurn={live.yourTurn}
                   listening={live.listening}
@@ -171,15 +194,11 @@ export const RadioPage = () => {
                   onRetry={live.retry}
                 />
               )}
-            </RigCase>
-          }
-          microphone={
-            <DeskMicrophone state={micState(state)} onHangUp={() => qso.hangUp(live.finish())} />
-          }
-        />
-      )}
-      {state.screen === 'call' && <ConversationLog entries={log} call={state.station.call} />}
-      {state.screen === 'report' && <Report state={state} onNewQso={qso.restart} />}
+              <p className="cq-hint">{t('log.hangUp')}</p>
+            </div>
+          )
+        }
+      />
     </Layout>
   );
 };

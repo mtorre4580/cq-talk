@@ -21,8 +21,10 @@ radio station. In ham radio, "CQ" means "calling any station".
 There is **no backend**. Users bring their own Anthropic API key, which stays in their browser
 and is only sent to `api.anthropic.com`. Without a key the app runs a scripted demo QSO.
 
-The visual source of truth is the prototype in `docs/prototype/Main.dc.html`. The UI must match
-it: colors, sizes, fonts, copy, animations and sounds.
+The visual source of truth is the prototype in `docs/prototype/index.html` (v2, the realistic
+receiver and the split call inspired by the film *Frequency*). The UI must match it: colors,
+sizes, fonts, copy and animations. The screens v2 did not redesign (QSL card, logbook) and the
+sounds still follow the first prototype, kept in `docs/prototype/v1/Main.dc.html`.
 
 ## Stack
 
@@ -98,11 +100,10 @@ libs/                    # added PR by PR; see docs/PLAN.md
     tuner/ call/ report/ settings/ logbook/   # type:feature · screens (features never import
                                               # each other: the app composes them)
 tools/
-  prototype/render.mjs   # renders the prototype to static HTML for a given state
   bundle/                # gzip budget check (pnpm check:bundle)
 docs/
   PLAN.md                # PR roadmap and phase details
-  prototype/             # design prototype (visual source of truth)
+  prototype/index.html   # design prototype v2 (visual source of truth); v1/ is the first one
 ```
 
 Every project is a workspace package named `@cq-talk/<name>` with its Nx tags in
@@ -137,12 +138,27 @@ Every project is a workspace package named `@cq-talk/<name>` with its Nx tags in
 
 ## Design
 
-Direction: a **vintage single-sideband transceiver on a desk at night**, under an aurora.
-Sage-green painted metal, cream enamel plates, an amber backlit dial, a cream S meter, a chrome
-desk microphone, a typewritten paper log and a printed QSL card. Dark only (there is no light
-theme in the prototype).
+Direction: a **1940s communications receiver on a wooden desk at night**, under an aurora, as
+real as CSS and SVG allow (the operator's voice is real, the radio should look it). Grey
+hammertone steel cabinet with chrome side trims, a black crackle front panel with screws, three
+backlit cream meter windows behind bakelite bezels and glass, knurled bakelite knobs, a chrome
+flywheel tuning knob, a red jewel ON AIR lamp, a bat-handle toggle, ivory preset keys, a black
+desk microphone on a chrome stand, a warm lamp light on the desk. On a call the screen splits in
+two along a waving aurora rift, as in the film: the desk set on the left, the QSO as plain light
+on the night on the right (no paper). Dark only.
 
-**Palette** (exact values from the prototype; they become `@theme` tokens in PR 2):
+**Receiver stylesheet**: `libs/ui/src/rig/rig.css` ports the prototype's CSS rule by rule
+(classes prefixed `cq-`; the prototype's body classes become `data-split`, `data-rift` and
+`data-call` on `.cq-split`). Inside the receiver every size is in container query units (`cqw`),
+so it scales as one object; textures are inline SVG data URIs (`feTurbulence` +
+`feDiffuseLighting`, allowed by `img-src data:`). The receiver's light follows three custom
+properties on the desk set (`Rig`): `--power` (dials: 0.45 standby, 1 on air, 0 closing),
+`--lamp` (ON AIR jewel) and `--tally` (the microphone's tally). Dial scales are computed from
+pure geometry in `libs/ui/src/rig/dial.ts`; the rift's light strands from `rift.ts` (a sine
+wave travelling up the rift, morphed by SMIL, still with reduced motion).
+
+**Palette** (v1 values, still used outside the receiver; the receiver's materials live in
+`rig.css`):
 
 | Role | Hex |
 |---|---|
@@ -160,29 +176,32 @@ theme in the prototype).
 | Paper (log) | `#F1E7CC`, ink `#2A2620`, operator `#7A4A12`, fix `#A3261B`, ok `#2F5B2A` |
 | QSL card | `#F3EAD3`, ink `#2A211B`, muted `#5A4A3A`, stamp `#A3261B` |
 | Aurora | green `rgba(70,255,170,.75)`, violet `rgba(150,90,255,.6)`, cyan `rgba(60,220,230,.55)` |
+| QSO on the night (v2) | text `#E8E4D8`, dim `#9FA9A4`, operator `#FFCF94`, fix `#E9B25F`, ok `#86D9A6` |
+| Receiver (v2) | steel `#5A605C`, crackle `#151413`, dial faces `#EFE3C4`, ivory keys `#F7EFDC → #CDBF9F` |
 
 **Tokens in code**: `libs/ui/src/theme.css` turns the palette into Tailwind utilities (`bg-night`,
 `text-amber`, `bg-rig-chassis`, `text-paper-ink`, `font-label`, `font-readout`…). Tailwind's
 default colors and fonts are cleared, so only these exist. The aurora uses the `cq-aurora-*`
 component classes; one global `prefers-reduced-motion` rule stops every animation and transition.
 
-**Matching the prototype**: `pnpm prototype:render out.html '{"screen":"home","pos":44}'` renders
-the prototype to static HTML for any state of its component (see `tools/prototype/render.mjs`).
-Serve it next to `pnpm dev` and compare element boxes at 1280 and 390 px. Copy sizes as
-arbitrary values (`text-[13px]`, `p-[22px]`) rather than rounding to the nearest Tailwind step.
+**Matching the prototype**: `docs/prototype/index.html` runs on its own (open it in a browser,
+add `<!doctype html>` first: the artifact host serves it in standards mode). Compare element boxes
+with the app at 1280 and 390 px; `layout-parity.spec.ts` does it for the radio page. Copy sizes
+exactly rather than rounding to the nearest Tailwind step.
 
 **Typography**: Special Elite (brand plate, QSL title and stamp), Oswald (labels, buttons,
 letter-spaced caps), Share Tech Mono (frequencies, display, clock), Courier Prime (body text).
 
-**Signature elements**: the aurora sky that brightens when on air; the amber dial with 25 ticks
-whose needle springs to the frequency (`cubic-bezier(.4,1.3,.6,1)`, 0.7 s); the knob that
-rotates `pos × 3.2°`; the S meter needle that swings while on air; the ON AIR lamp that
-pulses; the desk mic whose grille lights up amber and whose PTT bar turns red; the QSL card with
-its rotated red "73 · QSL" stamp.
+**Signature elements**: the aurora sky that brightens when on air; the "Megacycles" dial whose
+red needle springs to the frequency (`cubic-bezier(.4,1.3,.6,1)`, 0.7 s) with the band spread
+needle and the flywheel knob (`pos × 3.2°`); the S meter that drifts on standby and swings S5–S9
+on air; the aurora rift that flashes in the middle when a call goes out, rides the split to 54 %
+and narrows to a thread when it ends; the desk microphone (press it to call, press it again to
+hang up); the QSL card with its rotated red "73 · QSL" stamp.
 
-**Interaction**: keys sink 2 px when pressed; the display shows an amber focus ring; log lines
-fade in from 6 px below; the needle and knob animate together. All decorative motion (aurora,
-stars, lamp, S meter, fade-ins) stops with `prefers-reduced-motion`.
+**Interaction**: ivory keys sink when pressed; the readout strip shows an amber focus ring; QSO
+lines flicker in; the needle and knob animate together. All decorative motion (aurora, rift,
+stars, S meter, flickers) stops with `prefers-reduced-motion`.
 
 **Sound** (`libs/audio`, Web Audio, no files): tune-in = band-passed static sweeping
 700 → 2400 → 1300 Hz over 3.6 s, a heterodyne whistle gliding 2600 → 420 Hz and a 1 kHz lock
@@ -191,8 +210,8 @@ beep at 3 s; hang-up = a high-passed static burst and a 110 Hz click. On by defa
 and are no-ops where Web Audio does not exist.
 
 Copy stays plain and in the radio voice of the prototype. New UI the prototype does not show
-(language switcher, key dialog, text fallback, logbook) reuses the same materials: display for
-inputs, keys for options, enamel plate for headings.
+(language switcher, key dialog, text fallback, logbook) reuses the same materials: the amber
+readout for inputs, keys for options, the night text style for the QSO side.
 
 ## Conversation engine
 
@@ -318,10 +337,11 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - The e2e target depends on `@cq-talk/web:build` and Playwright starts `vite preview` itself.
   Nx's inferred preview readiness check never settles with the PWA plugin, so do not point
   `webServer` back at `nx run @cq-talk/web:preview`.
-- **Layout parity** (`layout-parity.spec.ts`): the test renders the prototype with
-  `renderPrototype()` (`tools/prototype/render.mjs`) using the app's own stylesheet, so both use
+- **Layout parity** (`layout-parity.spec.ts`): the test serves `docs/prototype/index.html` (with
+  a doctype, as the artifact host does) using the app's own stylesheet, so both use
   the same font files, measures its element boxes and the app's in the same run and browser, and
-  requires ±2 px on every screen at 1280×900. Measuring both live is what makes it hold on any
+  requires ±2 px at home and on air at 1280×900 (the footers are hidden on both: the app's has
+  the language switcher). Measuring both live is what makes it hold on any
   platform: fixed numbers measured on macOS failed on the Linux CI, where text rasterizes
   differently. `loadAllFonts()` loads every font face first, so late screens are never measured
   with a fallback font.
@@ -359,5 +379,8 @@ color alone (the lamp and LED always have a text label next to them). No horizon
 - [x] 10 — Live Claude operator
 - [x] 11 — QSL logbook and PDF export
 - [x] 12 — Installable PWA
+- [x] 14 — ElevenLabs operator voice
+- [ ] 15 — Realistic receiver and split call (prototype v2)
+- [ ] 16 — Valve power-up and power-down
 
 See `docs/PLAN.md` for the details of each phase.
