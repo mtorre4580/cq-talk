@@ -150,9 +150,14 @@ export const useLiveOperator = ({
     (raw: string) => {
       const text = normalizeTransmission(raw);
       if (!text) return;
+      // Half-duplex: one transmission per turn. A second one before the operator answers would
+      // start two replies at once
+      if (logRef.current[logRef.current.length - 1]?.who === 'you') return;
       const id = `you-${++counter.current}`;
       const before = logRef.current;
       dispatch({ type: 'transmission', id, text });
+      // Seen right away by a transmission arriving before the next render
+      logRef.current = [...before, { id, who: 'you', text }];
       setInterim('');
       const signal = controller.current?.signal;
       void engine.current

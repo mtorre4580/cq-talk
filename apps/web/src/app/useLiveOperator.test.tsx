@@ -99,6 +99,26 @@ describe('useLiveOperator', () => {
     expect(result.current.state.log[2]).toMatchObject({ who: 'operator', text: 'Why? Over.' });
   });
 
+  it('takes one transmission per turn, so the operator never answers twice at once', async () => {
+    const { result, mic } = setup(fakeEngine([['Hi. Over.'], ['Why? Over.'], ['Again? Over.']]));
+    act(() => result.current.dispatch({ type: 'call', topic: 'x', mode: 'live' }));
+    await waitFor(() => expect(result.current.live.yourTurn).toBe(true));
+
+    // The recognizer handing over the same words twice
+    act(() => {
+      mic.say('it is great over');
+      mic.say('it is great over');
+    });
+    await waitFor(() => expect(result.current.state.operatorTalking).toBe(false));
+    await waitFor(() => expect(result.current.state.log).toHaveLength(3));
+    expect(result.current.state.log.map((entry) => entry.who)).toEqual([
+      'operator',
+      'you',
+      'operator',
+    ]);
+    expect(result.current.state.log[2]).toMatchObject({ text: 'Why? Over.' });
+  });
+
   it('writes the QSL report on hang-up', async () => {
     const engine = fakeEngine([['Hi. Over.'], ['Ok. Over.']]);
     const { result } = setup(engine);
